@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><title>失序重奏 · 风格化二维码</title><style>
+@font-face{font-family:FangYuan;src:url('../../public/fonts/AlimamaFangYuanTiVF.woff2') format('woff2');font-display:block}
+*{box-sizing:border-box}html,body{margin:0;width:1800px;height:2100px;overflow:hidden;background:#070907;color:#f5f7f2;font-family:FangYuan,'Microsoft YaHei',sans-serif}
+.card{position:relative;width:1800px;height:2100px}.art{position:absolute;inset:0;width:1800px;height:2400px;object-fit:fill}.mast{position:absolute;left:110px;top:79px;display:flex;align-items:center;gap:28px;font-size:40px;font-weight:900;letter-spacing:3px}.mark{display:grid;place-items:center;width:85px;height:75px;background:#c8ff32;color:#070907;transform:skew(-9deg);font-size:50px}.mast em{color:#c8ff32;font-style:normal}.heading{position:absolute;left:0;right:0;top:193px;text-align:center}.heading h1{font-size:165px;line-height:1.1;font-weight:900;letter-spacing:2px;margin:0;text-shadow:4px 0 #42d9ff44}.heading h1 span{color:#c8ff32}.date{margin-top:26px;font-size:52px;font-weight:900;letter-spacing:10px;color:#c8ff32}.qr-window{position:absolute;left:389px;top:692px;width:1021px;height:1021px;background:white}.qr-window canvas{display:block;width:1021px;height:1021px}
+</style></head><body><main class="card"><img class="art" src="海报风格外框.png" alt=""><div class="mast"><b class="mark">H</b><span>HRG <em>//</em> LIVE</span></div><header class="heading"><h1>失序<span>重奏</span></h1><div class="date">2026.10.07</div></header><div class="qr-window"><canvas id="code" width="1021" height="1021" aria-label="活动QQ群二维码"></canvas></div></main>
+<script>
+// 使用原图的色彩覆盖范围作为遮罩，只修改墨色，不移动码点。
+const loadImage=src=>new Promise((resolve,reject)=>{const image=new Image();image.onload=()=>resolve(image);image.onerror=reject;image.src=src});
+window.renderCode=async function(sourceUrl,textureUrl){
+ const [source,texture]=await Promise.all([loadImage(sourceUrl),loadImage(textureUrl)]);
+ const make=()=>{const c=document.createElement('canvas');c.width=c.height=1021;return c};
+ const sourceCanvas=make(),textureCanvas=make();
+ const sc=sourceCanvas.getContext('2d'),tc=textureCanvas.getContext('2d');
+ sc.drawImage(source,170,721,1021,1021,0,0,1021,1021);tc.drawImage(texture,0,0,1021,1021);
+ const data=sc.getImageData(0,0,1021,1021),ink=tc.getImageData(0,0,1021,1021).data;
+ let foreground=0,unexpectedLight=0;
+ for(let i=0;i<data.data.length;i+=4){
+  const p=data.data;const max=Math.max(p[i],p[i+1],p[i+2]),min=Math.min(p[i],p[i+1],p[i+2]);
+  const alpha=Math.max(0,Math.min(1,(max-min-28)/32));
+  const x=(i/4)%1021,y=Math.floor(i/4/1021);
+  let r=8+ink[i]*.28,g=12+ink[i+1]*.32,b=30+ink[i+2]*.50;
+  // 高对比深蓝墨色；少量酸绿/洋红压暗点缀仍保持低亮度。
+  if(ink[i]>90&&ink[i+1]>110&&ink[i+2]<85){r=64;g=89;b=8;}
+  if(ink[i]>100&&ink[i+2]>90&&ink[i+1]<70){r=78;g=13;b=67;}
+  // 三个定位环内部加入深色金属阶梯和细窄荧光压暗边线，不侵入白色分隔带。
+  const centers=[[165,170],[862,170],[165,867]];
+  for(const [cx,cy] of centers){const d=Math.hypot(x-cx,y-cy);if(d>88&&d<108){const a=Math.atan2(y-cy,x-cx);if(Math.sin(a*7+.7)>0.2){r=49;g=88;b=11;}}}
+  p[i]=Math.round(255*(1-alpha)+r*alpha);p[i+1]=Math.round(255*(1-alpha)+g*alpha);p[i+2]=Math.round(255*(1-alpha)+b*alpha);p[i+3]=255;
+  if(alpha===1){foreground++;if((p[i]+p[i+1]+p[i+2])/3>110)unexpectedLight++;}
+ }
+ document.getElementById('code').getContext('2d').putImageData(data,0,0);
+ window.codeReport={sourceSize:[source.width,source.height],foregroundPixels:foreground,lightForegroundPixels:unexpectedLight,crop:[170,721,1021,1021],layoutPreserved:true};window.codeReady=true;
+};
+// 打开 HTML 时可直接使用；导出脚本传入 data URL 以便读取像素并验证。
+if(location.protocol==='http:'||location.protocol==='https:')renderCode('原始群二维码.jpg','二维码故障纹理-v2.png');
+else loadImage('风格化码点-v2.png').then(image=>document.getElementById('code').getContext('2d').drawImage(image,0,0));
+</script></body></html>

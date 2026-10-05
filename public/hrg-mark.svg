@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title">
+  <title id="title">HRG GAME</title>
+  <rect width="512" height="512" rx="128" fill="#b91c1c"/>
+  <path d="M96 128h80v96h160v-96h80v256h-80v-96H176v96H96V128Z" fill="#fff8f2"/>
+  <circle cx="384" cy="128" r="46" fill="#f6c453"/>
+</svg>

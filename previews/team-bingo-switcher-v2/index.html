@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>HRG · 五队 Bingo 二次元主题 v2</title>
+  <style>
+    @font-face { font-family: FangYuan; src: url('../../public/fonts/AlimamaFangYuanTiVF.woff2') format('woff2'); font-display: swap; }
+    * { box-sizing: border-box; }
+    :root { font-family: FangYuan, 'Microsoft YaHei', sans-serif; color-scheme: dark; }
+    body { margin: 0; color: #f5f7f2; background: #070907; }
+    button { font: inherit; }
+    button:focus-visible { outline: 2px solid #f5f7f2; outline-offset: 4px; }
+    .page { min-height: 100vh; overflow: hidden; background: radial-gradient(circle at 50% 35%, var(--page-glow, #cfff4510), transparent 43%), #070907; transition: background 600ms ease; }
+    .page-head { max-width: 1530px; margin: auto; padding: 30px 44px 0; display: flex; justify-content: space-between; align-items: end; gap: 28px; }
+    .page-head .tag { color: #c8ff32; font-size: 12px; font-weight: 900; letter-spacing: .22em; }
+    .page-head h1 { margin: 6px 0 0; font-size: clamp(28px, 3.4vw, 49px); line-height: 1.15; }
+    .page-head p { max-width: 460px; margin: 0; color: #a0aaa3; line-height: 1.6; font-size: 14px; }
+    .deck { position: relative; height: min(690px, calc(100vw * .52)); min-height: 530px; max-width: 1600px; margin: 0 auto; perspective: 1300px; touch-action: pan-y; }
+    .deck::before { content: ''; position: absolute; inset: 8% 13%; border: 1px solid #f5f7f20a; background-image: linear-gradient(#fff 1px, transparent 1px), linear-gradient(90deg,#fff 1px,transparent 1px); background-size: 48px 48px; opacity: .22; mask-image: radial-gradient(ellipse,#000,transparent 70%); pointer-events: none; }
+    .team-card { --accent: #cfff45; --accent2: #42d9ff; --third: #f5f7f2; --deep: #10170d; position: absolute; top: 50%; left: 50%; width: 860px; height: 860px; margin: -430px 0 0 -430px; isolation: isolate; background: radial-gradient(circle at 50% 50%, color-mix(in srgb, var(--accent) 8%, transparent), transparent 70%), #0b0e0d; border: 1px solid color-mix(in srgb,var(--accent) 32%,#354038); box-shadow: 0 36px 100px #000b, 0 0 50px color-mix(in srgb,var(--accent) 12%,transparent); transform-style: preserve-3d; backface-visibility: hidden; overflow: hidden; cursor: pointer; transition: transform 650ms cubic-bezier(.2,.7,.16,1), opacity 460ms ease, filter 560ms ease, box-shadow 560ms ease; }
+    .team-card[data-slot="0"] { z-index: 5; transform: translateX(0) scale(.74) rotateY(0); opacity: 1; filter: brightness(1); cursor: default; }
+    .team-card[data-slot="-1"] { z-index: 4; transform: translateX(-570px) scale(.57) rotateY(13deg); opacity: .9; filter: brightness(.72); }
+    .team-card[data-slot="1"] { z-index: 4; transform: translateX(570px) scale(.57) rotateY(-13deg); opacity: .9; filter: brightness(.72); }
+    .team-card[data-slot="-2"] { z-index: 2; transform: translateX(-1030px) scale(.47) rotateY(19deg); opacity: .45; filter: brightness(.5); }
+    .team-card[data-slot="2"] { z-index: 2; transform: translateX(1030px) scale(.47) rotateY(-19deg); opacity: .45; filter: brightness(.5); }
+    .team-card.teleport { transition: none !important; opacity: 0 !important; }
+    .team-card::before { content: ''; position: absolute; inset: 0; pointer-events: none; background-image: linear-gradient(#fff 1px,transparent 1px),linear-gradient(90deg,#fff 1px,transparent 1px); background-size: 42px 42px; opacity: .026; }
+    .card-frame { position: absolute; inset: 22px; border: 1px solid color-mix(in srgb,var(--accent) 52%,transparent); pointer-events: none; }
+    .card-frame::before, .card-frame::after { content: ''; position: absolute; width: 136px; height: 10px; background: var(--accent); }
+    .card-frame::before { left: -1px; top: -1px; }
+    .card-frame::after { right: -1px; bottom: -1px; }
+    .card-corner { position: absolute; width: 32px; height: 32px; border: 3px solid var(--accent2); pointer-events: none; }
+    .card-corner.tl { top: 42px; left: 42px; border-right: 0; border-bottom: 0; }
+    .card-corner.tr { top: 42px; right: 42px; border-left: 0; border-bottom: 0; }
+    .card-corner.bl { bottom: 42px; left: 42px; border-right: 0; border-top: 0; }
+    .card-corner.br { bottom: 42px; right: 42px; border-left: 0; border-top: 0; }
+    .card-side { position: absolute; top: 50%; color: var(--accent); font-size: 11px; font-weight: 900; letter-spacing: .25em; white-space: nowrap; opacity: .8; }
+    .card-side.left { left: 10px; transform: translateY(-50%) rotate(-90deg); }
+    .card-side.right { right: 9px; transform: translateY(-50%) rotate(90deg); }
+    .card-topline, .card-bottomline { position: absolute; left: 82px; right: 82px; display: flex; justify-content: space-between; align-items: center; font-size: 12px; font-weight: 900; letter-spacing: .16em; }
+    .card-topline { top: 35px; color: var(--accent); }
+    .card-bottomline { bottom: 35px; color: #a8b1aa; }
+    .card-bottomline b { color: var(--accent2); }
+    .ornament { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+    .ornament::before, .ornament::after { content: ''; position: absolute; }
+    .core { position: absolute; inset: 67px; padding: 20px 27px 17px; display: grid; grid-template-rows: 76px 1fr 28px; gap: 7px; background: #0b0f0e; border: 1px solid #43504b; box-shadow: 0 0 0 6px #050807, inset 0 0 35px #0008; }
+    .core-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; border-bottom: 1px solid #35403c; }
+    .core-head h2 { margin: -3px 0 0; font-size: 50px; line-height: 1; letter-spacing: -.04em; }
+    .core-head small { display: block; color: var(--accent); font-size: 10px; font-weight: 900; letter-spacing: .24em; }
+    .core-head .count { border-left: 1px solid #35403c; padding-left: 18px; color: #aab3ae; text-align: right; font-size: 11px; letter-spacing: .1em; }
+    .core-head .count b { display: block; color: #f5f7f2; font-size: 25px; line-height: 1.1; }
+    .board-grid { width: min(100%, 566px); height: 566px; align-self: center; justify-self: center; display: grid; grid-template-columns: repeat(5,minmax(0,1fr)); grid-template-rows: repeat(5,minmax(0,1fr)); gap: 5px; }
+    .cell { position: relative; min-width: 0; min-height: 0; overflow: hidden; display: flex; flex-direction: column; justify-content: space-between; padding: 9px; border: 1px solid #34403a; border-radius: 3px; background: #141b18; }
+    .cell::after { content: ''; position: absolute; right: -24px; bottom: -24px; width: 75px; height: 75px; border: 1px solid #ffffff12; transform: rotate(45deg); }
+    .cell.is-done { border-color: color-mix(in srgb,var(--accent) 80%,#34403a); background: color-mix(in srgb,var(--accent) 14%,#121a16); }
+    .cell.is-review { border-color: #ffab62; }
+    .cell-index { color: #a6b0a8; font-size: 15px; font-weight: 900; letter-spacing: .08em; }
+    .cell.is-done .cell-index { color: var(--accent); }
+    .cell-icon { align-self: center; width: 30px; height: 30px; color: var(--accent2); fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+    .cell.is-done .cell-icon { color: var(--accent); }
+    .cell-bottom { display: flex; justify-content: space-between; align-items: end; color: #a6b0a8; font-size: 9px; font-weight: 700; letter-spacing: .07em; }
+    .cell-bottom b { color: var(--accent); font-size: 17px; line-height: 1; }
+    .cell.is-review .cell-bottom b { color: #ffab62; }
+    .core-foot { display: flex; justify-content: space-between; align-items: end; color: #a8b1aa; font-size: 10px; font-weight: 800; letter-spacing: .13em; border-top: 1px solid #35403c; }
+    .core-foot b { color: var(--accent); }
+    /* 漫画感只在外层：网点、速度线、星形高光和硬边色块。 */
+    .team-card::after { content: ''; position: absolute; inset: 18px; z-index: -1; pointer-events: none; background-image: radial-gradient(var(--accent) 1.5px,transparent 1.6px); background-size: 11px 11px; opacity: .11; mask-image: linear-gradient(125deg,#000 0,transparent 24%,transparent 76%,#000); }
+    .team-card .card-frame::before { clip-path: polygon(0 0,100% 0,84% 100%,0 100%); }
+    .team-card .card-frame::after { clip-path: polygon(16% 0,100% 0,100% 100%,0 100%); }
+    .anime-spark { position: absolute; z-index: 1; display: block; width: 49px; height: 49px; background: var(--accent2); clip-path: polygon(50% 0,59% 35%,100% 50%,59% 61%,50% 100%,39% 61%,0 50%,39% 39%); filter: drop-shadow(0 0 12px var(--accent2)); pointer-events: none; }
+    .anime-spark.one { right: 12px; top: 75px; transform: rotate(12deg); }
+    .anime-spark.two { width: 24px; height: 24px; left: 33px; bottom: 122px; background: var(--accent); transform: rotate(-12deg); }
+    .speed-ribbon { position: absolute; top: 51px; left: 210px; right: 210px; height: 10px; background: repeating-linear-gradient(105deg,var(--accent) 0 20px,transparent 21px 33px,var(--accent2) 34px 37px,transparent 38px 51px); opacity: .56; pointer-events: none; }
+    .team-card .core-head h2 { text-shadow: 3px 3px 0 color-mix(in srgb,var(--accent) 36%,transparent); }
+    .team-card .cell.is-done { box-shadow: inset -3px -3px 0 color-mix(in srgb,var(--accent) 34%,transparent), inset 2px 2px 0 #ffffff14; }
+    .theme-phigros { --accent: #a9dfff; --accent2: #e6f8ff; --third: #6ebde8; --deep: #0d2330; background: radial-gradient(circle at 10% 90%,#7ed4ff26,transparent 58%),#0b1b27; }
+    .theme-phigros .ornament::before { top: -35px; right: -35px; width: 350px; height: 220px; background: repeating-linear-gradient(128deg,transparent 0 23px,#a9dfff30 24px 31px,transparent 32px 44px); transform: skew(-14deg); }
+    .theme-phigros .ornament::after { bottom: -55px; left: -75px; width: 380px; height: 190px; background: linear-gradient(135deg,#e6f8ff25 0 30%,transparent 31%),linear-gradient(145deg,transparent 50%,#6ebde847 51% 63%,transparent 64%); clip-path: polygon(0 25%,100% 0,82% 100%,0 100%); }
+    .theme-phigros .card-frame { clip-path: polygon(0 0,98% 0,100% 2%,100% 100%,2% 100%,0 98%); }
+    .theme-phigros .core { border-color: #5c91aa; background: #0b1b24; }
+    .theme-phigros .cell { border-color: #365c6d; background: #122631; }
+    .theme-arcaea { --accent: #c2a0ff; --accent2: #f0cbff; --third: #8f72db; --deep: #1d1233; background: radial-gradient(circle at 50% 0,#a578ff38,transparent 60%),#160d2a; }
+    .theme-arcaea .ornament::before { width: 590px; height: 590px; top: -260px; left: 125px; border: 3px solid #c2a0ff78; border-radius: 50%; box-shadow: 0 0 0 22px #f0cbff12, 0 0 0 49px #c2a0ff11; }
+    .theme-arcaea .ornament::after { width: 630px; height: 260px; bottom: -175px; left: 100px; border: 3px solid #f0cbff77; border-radius: 50%; transform: rotate(-12deg); }
+    .theme-arcaea .card-frame { border-color: #c2a0ff9c; border-radius: 25px; }
+    .theme-arcaea .core { border-color: #8770ac; border-radius: 12px; background: #140e24; }
+    .theme-arcaea .cell { border-color: #594671; background: #211733; border-radius: 7px; }
+    .theme-paradigm { --accent: #84adff; --accent2: #c4dcff; --third: #376dce; --deep: #0b2155; background: radial-gradient(circle at 15% 85%,#4b78e546,transparent 55%),#0a1a3b; }
+    .theme-paradigm .ornament::before { top: -35px; right: -55px; width: 390px; height: 390px; border: 42px solid #4f80ec2e; transform: rotate(45deg); }
+    .theme-paradigm .ornament::after { bottom: 15px; left: -65px; width: 370px; height: 100px; background: repeating-linear-gradient(118deg,#c4dcff54 0 15px,transparent 16px 32px); clip-path: polygon(0 0,100% 0,83% 100%,0 100%); }
+    .theme-paradigm .card-frame { border-width: 2px; clip-path: polygon(0 0,94% 0,100% 6%,100% 100%,6% 100%,0 94%); }
+    .theme-paradigm .core { border-color: #4773ba; background: #0b1c3d; }
+    .theme-paradigm .cell { background: #132b59; border-color: #315391; }
+    .theme-maimai { --accent: #ffe36d; --accent2: #fff1b3; --third: #ffbf53; --deep: #2a210d; background: radial-gradient(circle at 92% 20%,#ffe36d30,transparent 45%),#231c0b; }
+    .theme-maimai .ornament::before { width: 720px; height: 720px; left: 70px; top: 70px; border: 3px dashed #ffe36d88; border-radius: 50%; box-shadow: 0 0 0 22px #ffe36d10, 0 0 0 50px #ffbf5312; }
+    .theme-maimai .ornament::after { width: 260px; height: 260px; right: -160px; top: -140px; border: 29px solid #fff1b32b; border-radius: 50%; }
+    .theme-maimai .card-frame { border-radius: 36px; }
+    .theme-maimai .core { border-radius: 20px; border-color: #9b8541; background: #201a0d; }
+    .theme-maimai .cell { border-radius: 10px; border-color: #675832; background: #2b2412; }
+    .theme-community { --accent: #f4c9e6; --accent2: #c8bfff; --third: #bcebd1; --deep: #211a28; background: radial-gradient(circle at 20% 10%,#c8bfff2f,transparent 43%),#1a1722; }
+    .theme-community .ornament::before { height: 22px; left: 55px; right: 55px; top: 9px; background: linear-gradient(90deg,#f4c9e6,#bde4ff,#c8bfff,#bcebd1,#ffe0b2); opacity: .92; }
+    .theme-community .ornament::after { height: 22px; left: 55px; right: 55px; bottom: 9px; background: linear-gradient(90deg,#ffe0b2,#bcebd1,#c8bfff,#bde4ff,#f4c9e6); opacity: .82; }
+    .theme-community .card-frame { border-color: #f4c9e6ab; border-radius: 18px; }
+    .theme-community .card-frame::after { background: var(--third); }
+    .theme-community .core { border-color: #827187; background: #201a29; }
+    .theme-community .cell { border-color: #665777; background: #2b2335; }
+    .theme-community .cell:nth-child(5n+1) .cell-icon { color: #bde4ff; }
+    .theme-community .cell:nth-child(5n+2) .cell-icon { color: #f4c9e6; }
+    .theme-community .cell:nth-child(5n+3) .cell-icon { color: #c8bfff; }
+    .theme-community .cell:nth-child(5n+4) .cell-icon { color: #bcebd1; }
+    .theme-community .cell:nth-child(5n+5) .cell-icon { color: #ffe0b2; }
+    .theme-community .cell.is-done .cell-icon { color: var(--accent); }
+    .team-card .cell.is-done { border-color: color-mix(in srgb,var(--accent) 80%,#34403a); background: color-mix(in srgb,var(--accent) 14%,#121a16); }
+    .team-card .cell.is-review { border-color: #ffab62; }
+    .controls { position: relative; z-index: 7; max-width: 1040px; margin: -4px auto 36px; padding: 0 20px; display: grid; grid-template-columns: 55px 1fr 55px; align-items: center; gap: 12px; }
+    .nav { width: 52px; height: 52px; color: #f5f7f2; border: 1px solid #4c5850; border-radius: 50%; background: #131814; font-size: 27px; cursor: pointer; transition: background .2s, transform .2s, border-color .2s; }
+    .nav:hover { border-color: var(--active-accent,#cfff45); background: #222a24; transform: scale(1.06); }
+    .tabs { display: flex; justify-content: center; flex-wrap: wrap; gap: 7px; }
+    .tab { min-height: 39px; padding: 6px 13px; border: 1px solid #3a443d; background: #111512; color: #a6b0a8; border-radius: 6px; font-size: 12px; font-weight: 800; cursor: pointer; }
+    .tab[aria-current="true"] { border-color: var(--active-accent,#cfff45); color: var(--active-accent,#cfff45); background: color-mix(in srgb,var(--active-accent,#cfff45) 9%,#111512); }
+    .caption { max-width: 950px; margin: -12px auto 30px; padding: 0 28px; color: #9ba59d; text-align: center; font-size: 13px; line-height: 1.6; }
+    .caption strong { color: #f5f7f2; }
+    .concept-art { --active-accent:#a9dfff; position: relative; width: 1080px; height: 1080px; display: grid; place-items: center; overflow: hidden; background: radial-gradient(circle at 50% 42%, color-mix(in srgb,var(--active-accent) 11%,transparent),transparent 57%), #070907; }
+    .concept-art::before { content: ''; position: absolute; inset: 0; background-image: linear-gradient(#fff 1px,transparent 1px),linear-gradient(90deg,#fff 1px,transparent 1px); background-size: 48px 48px; opacity: .025; }
+    .concept-art .team-card { position: relative; top: auto; left: auto; margin: 0; transform: none; opacity: 1; filter: none; cursor: default; }
+    .concept-art .capture-note { position: absolute; left: 110px; top: 35px; color: var(--active-accent); font-size: 14px; font-weight: 900; letter-spacing: .17em; }
+    .concept-art .capture-foot { position: absolute; left: 110px; bottom: 32px; color: #a6b0a8; font-size: 13px; letter-spacing: .15em; }
+    body.capture { width: 1080px; height: 1080px; overflow: hidden; }
+    @media (max-width: 700px) {
+      .page-head { display: block; padding: 22px 18px 0; }
+      .page-head p { margin-top: 8px; }
+      .deck { height: 520px; min-height: 520px; margin-top: 4px; }
+      .team-card[data-slot="0"] { transform: translateX(0) scale(.44); }
+      .team-card[data-slot="-1"] { transform: translateX(-430px) scale(.32) rotateY(13deg); }
+      .team-card[data-slot="1"] { transform: translateX(430px) scale(.32) rotateY(-13deg); }
+      .team-card[data-slot="-2"], .team-card[data-slot="2"] { opacity: 0; pointer-events: none; }
+      .controls { grid-template-columns: 42px 1fr 42px; padding-inline: 12px; }
+      .nav { width: 40px; height: 40px; font-size: 22px; }
+      .tab { min-height: 34px; padding: 5px 9px; font-size: 11px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; }
+      .team-card[data-slot="-1"], .team-card[data-slot="1"], .team-card[data-slot="-2"], .team-card[data-slot="2"] { opacity: 0; pointer-events: none; }
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  <script>
+    const teams = [
+      {id:'phigros',name:'Phigros队',label:'PHIGROS',theme:'theme-phigros',accent:'#a9dfff',glow:'#a9dfff18',line:'浅蓝切片 × 漫画速度线',number:'01'},
+      {id:'arcaea',name:'Arcaea队',label:'ARCAEA',theme:'theme-arcaea',accent:'#c2a0ff',glow:'#c2a0ff1e',line:'紫色弧轨 × 星光分镜',number:'02'},
+      {id:'paradigm',name:'范式起源队',label:'PARADIGM',theme:'theme-paradigm',accent:'#84adff',glow:'#376dce2c',line:'深蓝装甲 × 锐角分镜',number:'03'},
+      {id:'maimai',name:'maimai队',label:'MAIMAI',theme:'theme-maimai',accent:'#ffe36d',glow:'#ffe36d1a',line:'明黄圆环 × 漫画网点',number:'04'},
+      {id:'community',name:'全能队',label:'ALL-ROUND',theme:'theme-community',accent:'#f4c9e6',glow:'#f4c9e61c',line:'彩色马卡龙 × 音游群像',number:'05'},
+    ];
+    const symbols = [
+      '<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="2"/><path d="M12 1v4M12 19v4M1 12h4M19 12h4"/>',
+      '<path d="M2 12h4l2-6 4 12 3-9 2 3h5"/>',
+      '<path d="m13 2-9 11h7l-1 9 10-12h-7V2Z"/>',
+      '<path d="M4 4v16M4 6h13l-3 5 3 5H4"/>',
+      '<circle cx="12" cy="12" r="9"/><path d="M12 3v9l5 3"/>',
+      '<path d="M4 18V8M9 18V4M14 18v-7M19 18V6"/>',
+      '<path d="m3 9 9-6 9 6-9 6-9-6ZM3 15l9 6 9-6"/>',
+    ];
+    const done = new Set([2,7,11,16,20,24]);
+    const review = new Set([5,14]);
+    function cell(n) {
+      const state = done.has(n) ? ' is-done' : review.has(n) ? ' is-review' : '';
+      const status = done.has(n) ? 'CLEAR' : review.has(n) ? 'REVIEW' : 'TASK';
+      const score = 8 + (n * 7) % 15;
+      return `<div class="cell${state}"><span class="cell-index">${String(n).padStart(2,'0')}</span><svg class="cell-icon" viewBox="0 0 24 24" aria-hidden="true">${symbols[(n-1)%symbols.length]}</svg><div class="cell-bottom"><span>${status}</span><b>${score}</b></div></div>`;
+    }
+    const grid = Array.from({length:25},(_,i)=>cell(i+1)).join('');
+    function card(t) { return `<article class="team-card ${t.theme}" data-team="${t.id}" aria-label="${t.name} Bingo 概念图"><div class="ornament"></div><div class="card-frame"></div><i class="card-corner tl"></i><i class="card-corner tr"></i><i class="card-corner bl"></i><i class="card-corner br"></i><i class="anime-spark one"></i><i class="anime-spark two"></i><i class="speed-ribbon"></i><div class="card-topline"><span>HRG // TEAM BINGO</span><span>${t.number} / 05</span></div><span class="card-side left">${t.label}</span><span class="card-side right">STAGE B · LIVE</span><div class="core"><div class="core-head"><div><small>${t.name} · 任务矩阵</small><h2>BINGO</h2></div><div class="count"><b>25</b>格任务</div></div><div class="board-grid">${grid}</div><div class="core-foot"><span>已完成 <b>06</b> / 25</span><span>点击格子查看任务</span><span>TEAM ${t.number}</span></div></div><div class="card-bottomline"><span>${t.line}</span><b>✦ ✦ ✦ ✦ ✦</b></div></article>`; }
+    const requested = new URLSearchParams(location.search).get('team');
+    const captureTeam = teams.find(t=>t.id===requested);
+    if (captureTeam) {
+      document.body.className = 'capture';
+      document.getElementById('root').innerHTML = `<main class="concept-art" style="--active-accent:${captureTeam.accent}"><span class="capture-note">DESIGN STUDY / ${captureTeam.number} OF 05</span>${card(captureTeam)}<span class="capture-foot">STATIC BINGO CORE · DECORATIVE OUTER SHELL</span></main>`;
+    } else {
+      document.getElementById('root').innerHTML = `<main class="page" id="page"><header class="page-head"><div><span class="tag">HRG // TEAM BINGO · ANIME STYLE V2</span><h1>五队任务卡切换预览</h1></div><p>同一张静态 5 × 5 Bingo 棋盘；队伍色彩和漫画风装饰放在外框。切换时整张卡片移动，棋盘内容保持稳定。</p></header><div class="deck" id="deck" aria-label="五支队伍 Bingo 概念卡片">${teams.map(card).join('')}</div><nav class="controls" aria-label="切换队伍"><button class="nav" id="prev" type="button" aria-label="上一队">‹</button><div class="tabs">${teams.map((t,i)=>`<button class="tab" type="button" data-index="${i}">${t.name}</button>`).join('')}</div><button class="nav" id="next" type="button" aria-label="下一队">›</button></nav><p class="caption"><strong id="active-name"></strong> · <span id="active-description"></span>　可点左右卡片、队名或使用键盘 ← → 切换。</p></main>`;
+      const cards = [...document.querySelectorAll('.team-card')];
+      const tabs = [...document.querySelectorAll('.tab')];
+      const page = document.getElementById('page');
+      let active = 0;
+      function select(next) {
+        active = (next + teams.length) % teams.length;
+        const teleported = [];
+        cards.forEach((el,i)=>{
+          let offset = i-active;
+          if(offset>2) offset-=teams.length;
+          if(offset< -2) offset+=teams.length;
+          if(el.dataset.slot !== undefined && Math.abs(Number(el.dataset.slot)-offset)>2) {
+            el.classList.add('teleport');
+            teleported.push(el);
+          }
+          el.dataset.slot = String(offset);
+          el.setAttribute('aria-hidden',offset===0?'false':'true');
+        });
+        if(teleported.length) requestAnimationFrame(()=>requestAnimationFrame(()=>teleported.forEach(el=>el.classList.remove('teleport'))));
+        tabs.forEach((el,i)=>el.setAttribute('aria-current',i===active?'true':'false'));
+        page.style.setProperty('--active-accent',teams[active].accent);
+        page.style.setProperty('--page-glow',teams[active].glow);
+        document.getElementById('active-name').textContent = teams[active].name;
+        document.getElementById('active-description').textContent = teams[active].line;
+      }
+      document.getElementById('prev').addEventListener('click',()=>select(active-1));
+      document.getElementById('next').addEventListener('click',()=>select(active+1));
+      tabs.forEach((el,i)=>el.addEventListener('click',()=>select(i)));
+      cards.forEach((el,i)=>el.addEventListener('click',()=>select(i)));
+      document.addEventListener('keydown',e=>{if(e.key==='ArrowLeft') select(active-1); if(e.key==='ArrowRight') select(active+1)});
+      let startX=0;
+      const deck=document.getElementById('deck');
+      deck.addEventListener('pointerdown',e=>{startX=e.clientX});
+      deck.addEventListener('pointerup',e=>{const delta=e.clientX-startX;if(Math.abs(delta)>55) select(active+(delta<0?1:-1))});
+      select(0);
+    }
+  </script>
+</body>
+</html>
