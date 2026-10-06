@@ -2,6 +2,7 @@ import { useRef, useState } from 'react';
 import { PlaceholderBoard } from '../adapters/board';
 import type { BoardTaskView } from '../adapters/board';
 import { runRuleSuite } from './ruleSuite';
+import { runFeatureReadiness } from './featureReadiness';
 import type { RuleResult, SuiteReport } from './ruleSuite';
 import { checkRealDevices } from './deviceChecks';
 import './testLab.css';
@@ -14,11 +15,11 @@ export default function TestLab() {
   const [board, setBoard] = useState<BoardTaskView[]>([]); const [selectedTask, setSelectedTask] = useState('');
   const controller = useRef<AbortController | null>(null);
   const append = (result: RuleResult) => setResults(current => [...current, result]);
-  const start = async () => {
+  const start = async (readiness = false) => {
     setError(''); setResults([]); setReport(null); setBoard([]); setSelectedTask(''); setRunning(true);
     const abort = new AbortController(); controller.current = abort;
     try {
-      const completed = await runRuleSuite({ baseUrl: baseUrl.trim(), key, signal: abort.signal, onResult: append, onBoard: tasks => setBoard(tasks.map(task => ({ id: task.id, title: task.title ?? task.id, points: task.points ?? 0, state: task.awarded ? 'awarded' : 'available' }))) });
+      const completed = await (readiness ? runFeatureReadiness : runRuleSuite)({ baseUrl: baseUrl.trim(), key, signal: abort.signal, onResult: append, onBoard: tasks => setBoard(tasks.map(task => ({ id: task.id, title: task.title ?? task.id, points: task.points ?? 0, state: task.awarded ? 'awarded' : 'available' }))) });
       if (realDevices && completed.failed === 0 && !abort.signal.aborted) {
         const deviceResults: RuleResult[] = [];
         await checkRealDevices(baseUrl.trim(), key, result => { deviceResults.push(result); append(result); });
@@ -45,8 +46,8 @@ export default function TestLab() {
         <label>后端地址<input type="url" value={baseUrl} onChange={event => setBaseUrl(event.target.value)} disabled={running} placeholder="https://test-api.example.com" /></label>
         <label>测试访问密钥<input type="password" value={key} onChange={event => setKey(event.target.value)} disabled={running} autoComplete="off" placeholder="粘贴服务器 TEST_API_KEY" /></label>
         <label className="rule-lab__device"><input type="checkbox" checked={realDevices} onChange={event => setRealDevices(event.target.checked)} disabled={running} />同时检查本机 GPS 和相机权限；定位将写入独立测试赛局，相机画面不上传。</label>
-        <div className="rule-lab__actions"><button className="button button--primary" onClick={() => { void start(); }} disabled={running || key.length < 32}>一键执行规则测试</button>{running ? <button className="button" onClick={() => controller.current?.abort()}>停止测试</button> : null}<button className="button" onClick={download} disabled={!report}>下载测试报告</button></div>
-        <p>密钥仅保留在当前页面内存中。定位时钟、排名周期和效果到期使用测试赛局虚拟时间。正式比赛页面目前仍使用前端原型，不会被本测试自动改写。</p>
+        <div className="rule-lab__actions"><button className="button button--primary" onClick={() => { void start(); }} disabled={running || key.length < 32}>一键执行规则测试</button><button className="button" onClick={() => { void start(true); }} disabled={running || key.length < 32}>专项功能验收</button>{running ? <button className="button" onClick={() => controller.current?.abort()}>停止测试</button> : null}<button className="button" onClick={download} disabled={!report}>下载测试报告</button></div>
+        <p>密钥仅保留在当前页面内存中。专项功能验收会检测自创事件、文本收件、最低队伍挑战和区域奖励卡，未实现会如实显示失败。定位时钟使用虚拟时间；正式比赛页面目前仍使用前端原型。</p>
       </section>
       <section className="rule-lab__summary" aria-live="polite"><strong>{running ? '测试执行中' : report ? `自动通过 ${report.passed} · 失败 ${report.failed} · 待实机验收 ${report.manual}` : '等待运行'}</strong>{report ? <span>数据库：{report.database}</span> : null}{error ? <p role="alert">{error}</p> : null}</section>
       <ol className="rule-lab__results" aria-label="逐项测试结果">{results.map((result, index) => <li key={`${result.id}-${index}`} className={`rule-result rule-result--${result.status}`}><div><span>{result.id}</span><strong>{result.title}</strong></div><b>{labels[result.status]}</b><p>{result.detail}</p><small>{result.durationMs} ms</small></li>)}</ol>

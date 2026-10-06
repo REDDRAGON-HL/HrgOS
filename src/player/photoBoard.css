@@ -30,7 +30,7 @@
 .photo-preview.is-loaded img.photo-preview__haze { opacity:.45; }
 /* Static blur textures crossfade instead of recalculating a blur filter every frame. */
 .photo-preview.is-visible .photo-preview__haze { animation:clue-fog 7s var(--photo-delay) ease-in-out 2; }
-.photo-motion-paused .photo-preview__haze { animation-play-state:paused; }
+.photo-motion-paused .photo-preview.is-visible .photo-preview__haze { animation-play-state:paused; }
 .bingo-cell:focus-visible .photo-preview__haze { animation-play-state:paused; }
 .photo-preview:not(.is-visible) .photo-preview__haze { animation-play-state:paused; }
 .photo-preview__error { display:grid;place-items:center;height:100%;padding:18px;color:var(--ink-soft);font-size:.7rem; }

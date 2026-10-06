@@ -5,12 +5,16 @@ export interface SuiteReport { startedAt: string; finishedAt: string; target: st
 const image = { name: 'fixture.png', mime: 'image/png', base64: 'iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAYAAABytg0kAAAACXBIWXMAAAPoAAAD6AG1e1JrAAAAEUlEQVR4nGPgkuT6D8IMMAYAJKIEsYXC9Q4AAAAASUVORK5CYII=' };
 const ensure = (valid: unknown, message: string) => { if (!valid) throw new Error(message); };
 
-/** 浏览器与命令行共用；所有业务断言经真实 HTTP / WebSocket 公开接口验证。 */
-export async function runRuleSuite(options: SuiteOptions): Promise<SuiteReport> {
-  const url = new URL(options.baseUrl);
+export function validateTestApiBase(baseUrl: string) {
+  const url = new URL(baseUrl);
   ensure(url.protocol === 'https:' || url.protocol === 'http:' && ['localhost', '127.0.0.1', '[::1]'].includes(url.hostname), '异地后端必须使用 HTTPS；HTTP 仅允许 localhost');
   ensure(!url.username && !url.password && !url.search && !url.hash, '后端地址不能包含凭据或查询参数');
-  const base = url.href.replace(/\/$/, '');
+  return url.href.replace(/\/$/, '');
+}
+
+/** 浏览器与命令行共用；所有业务断言经真实 HTTP / WebSocket 公开接口验证。 */
+export async function runRuleSuite(options: SuiteOptions): Promise<SuiteReport> {
+  const base = validateTestApiBase(options.baseUrl);
   const startedAt = new Date().toISOString(); const results: RuleResult[] = []; const tokens: Record<string, string> = {};
   let run: Record<string, any> = {}; let database = 'unknown';
   const publish = (result: RuleResult) => { results.push(result); options.onResult?.(result); };

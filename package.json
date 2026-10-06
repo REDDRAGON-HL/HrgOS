@@ -11,6 +11,8 @@
     "test:backend": "node --test server/rules.check.mjs server/persistence.check.mjs",
     "test:rules": "node --env-file-if-exists=.env.test.local scripts/test-rules.mjs",
     "test:rules:local": "node scripts/test-rules.mjs --local",
+    "test:readiness": "node --env-file-if-exists=.env.test.local scripts/test-rules.mjs --readiness",
+    "test:readiness:local": "node scripts/test-rules.mjs --local --readiness",
     "test:lab": "node scripts/start-test-lab.mjs",
     "server": "node --env-file-if-exists=.env.test.local server/start.mjs"
   },

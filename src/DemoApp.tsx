@@ -72,14 +72,14 @@ export default function DemoApp({ mode, account, onLogout }: { mode: UserMode; a
       {
         id: `M-${Date.now()}`,
         type: "review",
-        title: "提交已进入审核队列",
-        body: `“${task.title}”的图片 ${filename} 已按提交时间排队。`,
+        title: "本地演示提交已记录",
+        body: `“${task.title}”的文件名 ${filename} 已加入本页演示队列；图片未上传，其他设备的工作人员不会收到。`,
         time: nowLabel(),
         unread: true
       },
       ...current
     ]);
-    notify({ tone: "success", title: "提交成功", body: "已按服务器时间加入审核队列。" });
+    notify({ tone: "warning", title: "仅本地演示", body: "已记录文件名，图片未上传到服务器，工作人员设备不会收到。" });
   };
 
   const handleUseCard = (cardId: string, target: string) => {
