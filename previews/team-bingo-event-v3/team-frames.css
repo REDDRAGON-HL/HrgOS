@@ -1,0 +1,38 @@
+/* 五套独立边缘的材质与壳体；共享内芯不变，装饰始终留在外侧 9% 内。 */
+.side-echo{display:none}
+.edge-art{inset:0;width:100%;height:100%;object-fit:fill;filter:drop-shadow(0 6px 5px #0004)}
+.board-shell{border-radius:0;box-shadow:none;background:none}
+.board-shell::before{inset:8.9%;border-color:#b8c7e91f;border-radius:12px;background:linear-gradient(150deg,#202b3b,#111c2b);z-index:0}
+.board-core{z-index:5}
+.region-tabs{list-style:none;margin:0;padding:0}
+.region-step{display:flex;align-items:center;justify-content:center;gap:5px;min-height:40px;min-width:40px;padding:6px;border:1px solid #b3c6dd30;border-radius:5px;color:#bbc9dc;font-size:14px;font-variant-numeric:tabular-nums}
+.region-step.is-current{background:var(--accent);border-color:var(--accent);color:#101424;font-weight:900}
+.region-step.is-locked{color:#a4b2c8;border-style:dashed}
+.region-step svg{width:12px;height:12px}
+[data-team=maimai] .region-step{border-radius:50%}
+.event-stage{padding-top:12px}
+[data-team=phigros] .board-shell::before{border-radius:0;background:linear-gradient(140deg,#18293a,#111e2b)}
+[data-team=phigros] .cell{border-radius:3px}
+[data-team=phigros] .region-tab{border-radius:3px}
+[data-team=arcaea] .board-shell::before{border-radius:16px;background:linear-gradient(145deg,#2e2940,#171d2e)}
+[data-team=arcaea] .cell{border-radius:9px 3px 9px 3px}
+[data-team=paradigm] .board-shell::before{border-radius:2px;background:linear-gradient(150deg,#202941,#121c32)}
+[data-team=paradigm] .cell{border-radius:2px}
+[data-team=paradigm] .region-tab{border-radius:2px}
+[data-team=maimai] .board-shell::before{border-radius:20px;background:linear-gradient(145deg,#2c2945,#191e35)}
+[data-team=maimai] .cell{border-radius:13px;border-color:#c9b9e44d}
+[data-team=maimai] .region-tab{border-radius:50%}
+[data-team=community] .board-shell::before{border-radius:20px 5px 20px 5px;background:linear-gradient(145deg,#1c3147,#15223c)}
+[data-team=community] .cell{border-radius:8px 2px 8px 2px}
+/* 外侧框入场只出现一次，暂停与减少动态均关闭；不使用循环眩光。 */
+.board-scene.is-entering .edge-art{animation:frame-seat 420ms var(--ease) both}
+.motion-paused .edge-art{animation:none!important}
+@keyframes frame-seat{from{opacity:.3;transform:scale(1.025)}to{opacity:1;transform:none}}
+@media(max-width:700px){
+ .event-stage{padding-top:75px}
+ .edge-art{inset:0;width:100%;height:100%}
+ [data-team=maimai] .cell{border-radius:8px}
+ .board-shell::before{inset:8.9%}
+ .region-step{min-width:36px;min-height:36px;font-size:12px}
+}
+@media(prefers-reduced-motion:reduce){.board-scene.is-entering .edge-art{animation:none}}

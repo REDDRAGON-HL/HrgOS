@@ -2,7 +2,8 @@
 
 - Desktop uses two columns only: `Bingo + 战术道具` and `队长定位`.
 - No task list, task tab or direct task entry exists outside the Bingo grid.
-- Bingo is a 3×3 high-density grid. A cell shows public state and score but hides task details until activation.
+- Bingo is a 5×5 grid with 19 photo clues and 6 direct tasks. A cell shows public state and score but hides task details until activation.
+- Region progress is read-only. Only staff approval of that team's next entrance advances its region; all 19 photos update together while task IDs, points and completion states remain intact. Each team progresses independently.
 - The card hand sits directly below Bingo. Cards fan from the bottom and lift on hover/focus; touch users scroll horizontally.
 - Card art is original geometric HUD artwork. Category mapping: intel/cyan, boost/lime, control/magenta.
 - The location column stays sticky on desktop and moves below the main column on narrow screens.

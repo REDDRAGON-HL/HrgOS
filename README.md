@@ -2,6 +2,16 @@
 
 面向杭州西湖线下活动的本机运行 Web App 首版。当前包含玩家端、工作人员端、PWA 基础能力和可替换棋盘接口。
 
+## 最近对话产物
+
+- 五队 Bingo 美术、独立边框和审阅页：`previews/team-bingo-event-v3/`，设计记录位于 `design-system/hrg-game/pages/`。
+- 活动公示及规则海报：`previews/hrg-event-announcement/`、`previews/hrg-event-announcement-v2/`、`previews/hrg-rules-poster/`；项目根目录包含两张成品海报。
+- 图寻原图、评估、处理方案和三个区域共 57 张成品：`outputs/photo-review-20261006/`、`outputs/photo-styles-review-20261006/`、`outputs/photo-final-20261006/`；根目录拍摄地点表保留原始标注。前端使用 `public/images/photo-clues/` 的交付素材。
+- 125 项挑战的最新命名版：[HRG挑战任务汇总_任务命名版.xlsx](outputs/task-integration-20261006/HRG挑战任务汇总_任务命名版.xlsx)，同目录保留来源、难度调整、构建脚本和历史版本。
+- 报名表配置记录：`outputs/signup-20261006/`；账号密码清单和报名个人资料仍排除在仓库之外。
+
+拍摄地点表和图寻成品压缩包使用 Git LFS。需要完整下载这两个文件时，先安装 Git LFS，再执行 `git lfs install` 和 `git lfs pull`。它们是源素材与交付归档，正式网站构建不依赖这两个归档文件。`outputs/` 中的原图、地点说明和答案对应表用于工作人员审阅，请勿直接作为选手页面发布。
+
 ## 能力卡和正式比赛后端
 
 新增接通后端的比赛界面：开发访问 `/?live=cards`；隔离体验 `/?live=cards&training=1`；测试页新增“一键测试 22 张能力卡”。22张卡包含库存、确认/接收、暂停冻结计时、证据上传、工作人员结算、真实历史回返、临时排名/追逐定位、半分奖励和任务交换。完成区域五项计分任务会自动且仅发一张卡。

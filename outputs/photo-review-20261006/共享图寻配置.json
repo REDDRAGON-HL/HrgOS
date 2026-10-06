@@ -1,0 +1,752 @@
+{
+  "schemaVersion": 1,
+  "status": "proposed-not-integrated",
+  "boards": 5,
+  "gridSize": [
+    5,
+    5
+  ],
+  "tasksPerBoard": 25,
+  "totalTasks": 125,
+  "photoGateTasks": 95,
+  "directTasks": 30,
+  "photosPerRegion": 19,
+  "notes": [
+    "同一slot和区域在五块Bingo中读取相同图片；每队任务与完成状态独立。",
+    "图片共用不自动合并taskId、审核或完成状态。",
+    "图片初评分级不能替代实际寻找时间或任务难度。",
+    "区域2、3开场图未在原表明确指定。"
+  ],
+  "cells": [
+    {
+      "position": "R1C1",
+      "kind": "direct",
+      "slot": "D01",
+      "photos": [],
+      "grade": null
+    },
+    {
+      "position": "R1C2",
+      "kind": "photo",
+      "slot": "P02",
+      "photos": [
+        {
+          "id": 4,
+          "region": 1,
+          "filename": "IMG_20260917_144108.jpg",
+          "sourceRow": 5,
+          "estimatedDifficulty": 1,
+          "processing": "保留完整双门面，人物不是复刻条件。"
+        },
+        {
+          "id": 32,
+          "region": 2,
+          "filename": "IMG_20260917_160147.jpg",
+          "sourceRow": 33,
+          "estimatedDifficulty": 1,
+          "processing": "完整门面保留，不能只给通用7标。"
+        },
+        {
+          "id": 48,
+          "region": 3,
+          "filename": "4362A7841EBCA923C29572011D8BA1E8.jpg",
+          "sourceRow": 49,
+          "estimatedDifficulty": 1,
+          "processing": "保留店名与左侧立柱；人物不计入复刻。"
+        }
+      ],
+      "grade": 1
+    },
+    {
+      "position": "R1C3",
+      "kind": "photo",
+      "slot": "P19",
+      "photos": [
+        {
+          "id": 11,
+          "region": 1,
+          "filename": "IMG_20260917_150700.jpg",
+          "sourceRow": 12,
+          "estimatedDifficulty": 3,
+          "processing": "保留整组奔马与右侧扶手，允许细看，不遮壁画。"
+        },
+        {
+          "id": 38,
+          "region": 2,
+          "filename": "IMG_20260917_162506.jpg",
+          "sourceRow": 39,
+          "estimatedDifficulty": 3,
+          "processing": "保留中庭矩形框架，不只给星点灯光。"
+        },
+        {
+          "id": 51,
+          "region": 3,
+          "filename": "9EFA0D86CC7B12CDE7D7E63DBEC75593.jpg",
+          "sourceRow": 52,
+          "estimatedDifficulty": 3,
+          "processing": "保留整段通道，广告内容与行人不作为匹配条件；与#66只用一张。"
+        }
+      ],
+      "grade": 3
+    },
+    {
+      "position": "R1C4",
+      "kind": "photo",
+      "slot": "P05",
+      "photos": [
+        {
+          "id": 18,
+          "region": 1,
+          "filename": "IMG_20260917_152222.jpg",
+          "sourceRow": 19,
+          "estimatedDifficulty": 1,
+          "processing": "保留完整中文和英文馆名，不要求入馆。"
+        },
+        {
+          "id": 44,
+          "region": 2,
+          "filename": "IMG_20260917_164105.jpg",
+          "sourceRow": 45,
+          "estimatedDifficulty": 1,
+          "processing": "保留高拱和店名。"
+        },
+        {
+          "id": 58,
+          "region": 3,
+          "filename": "IMG_20260917_183224.jpg",
+          "sourceRow": 59,
+          "estimatedDifficulty": 1,
+          "processing": "保持展名与入口，不要求购票进入展区。"
+        }
+      ],
+      "grade": 1
+    },
+    {
+      "position": "R1C5",
+      "kind": "photo",
+      "slot": "P11",
+      "photos": [
+        {
+          "id": 15,
+          "region": 1,
+          "filename": "IMG_20260917_151402.jpg",
+          "sourceRow": 16,
+          "estimatedDifficulty": 2,
+          "processing": "保留全部通道结构，不要求购票进入。"
+        },
+        {
+          "id": 29,
+          "region": 2,
+          "filename": "IMG_20260917_155406.jpg",
+          "sourceRow": 30,
+          "estimatedDifficulty": 2,
+          "processing": "保留门框、霓虹箭头和名称。"
+        },
+        {
+          "id": 49,
+          "region": 3,
+          "filename": "918F374D8AAD3A8FD22801C0FFDC84B0.jpg",
+          "sourceRow": 50,
+          "estimatedDifficulty": 2,
+          "processing": "只遮图腾下方中文店名与英文名称。完整保留图腾、竹纹、真实墙面；不生成替代花纹。"
+        }
+      ],
+      "grade": 2
+    },
+    {
+      "position": "R2C1",
+      "kind": "photo",
+      "slot": "P04",
+      "photos": [
+        {
+          "id": 16,
+          "region": 1,
+          "filename": "IMG_20260917_151710.jpg",
+          "sourceRow": 17,
+          "estimatedDifficulty": 1,
+          "processing": "保留码头和背景，不仅给游船；船不作为必须复刻的对象。"
+        },
+        {
+          "id": 26,
+          "region": 2,
+          "filename": "345A993339672F365B4157DA4AA9F81D.jpg",
+          "sourceRow": 27,
+          "estimatedDifficulty": 1,
+          "processing": "保留文字和树木遮挡关系，后台写明浙江展览馆南广场站位。"
+        },
+        {
+          "id": 54,
+          "region": 3,
+          "filename": "IMG_20260917_181427.jpg",
+          "sourceRow": 55,
+          "estimatedDifficulty": 1,
+          "processing": "保留城堡背景与机台组合，不只截屏幕。"
+        }
+      ],
+      "grade": 1
+    },
+    {
+      "position": "R2C2",
+      "kind": "photo",
+      "slot": "P17",
+      "photos": [
+        {
+          "id": 5,
+          "region": 1,
+          "filename": "IMG_20260917_144223.jpg",
+          "sourceRow": 6,
+          "estimatedDifficulty": 3,
+          "processing": "保留摆件全貌及后方品牌墙，不裁成纯小猪头像。"
+        },
+        {
+          "id": 27,
+          "region": 2,
+          "filename": "52EF8BB3D7FC0EB5A017C9CEF87A06E1.jpg",
+          "sourceRow": 28,
+          "estimatedDifficulty": 3,
+          "processing": "保留两球的体积与栏杆位置，不要求发光球显示同一图案。"
+        },
+        {
+          "id": 52,
+          "region": 3,
+          "filename": "AF001BD7D50FB43BF0B84A4C62D7A995.jpg",
+          "sourceRow": 53,
+          "estimatedDifficulty": 3,
+          "processing": "保留三者相邻关系；不要只给毛绒头像。"
+        }
+      ],
+      "grade": 3
+    },
+    {
+      "position": "R2C3",
+      "kind": "direct",
+      "slot": "D02",
+      "photos": [],
+      "grade": null
+    },
+    {
+      "position": "R2C4",
+      "kind": "photo",
+      "slot": "P12",
+      "photos": [
+        {
+          "id": 19,
+          "region": 1,
+          "filename": "IMG_20260917_152621.jpg",
+          "sourceRow": 20,
+          "estimatedDifficulty": 2,
+          "processing": "保留三项特征与俯拍角度；与#20只正式选一张。"
+        },
+        {
+          "id": 36,
+          "region": 2,
+          "filename": "IMG_20260917_162028.jpg",
+          "sourceRow": 37,
+          "estimatedDifficulty": 2,
+          "processing": "保留R与下方店面，不只留下单字母。"
+        },
+        {
+          "id": 55,
+          "region": 3,
+          "filename": "IMG_20260917_182029.jpg",
+          "sourceRow": 56,
+          "estimatedDifficulty": 2,
+          "processing": "遮顶部重复名称，中央保留A和X作为弱提示，遮N/I/P/L/E的文字，不遮发光框架。"
+        }
+      ],
+      "grade": 2
+    },
+    {
+      "position": "R2C5",
+      "kind": "photo",
+      "slot": "P01",
+      "photos": [
+        {
+          "id": 3,
+          "region": 1,
+          "filename": "IMG_20260917_144000.jpg",
+          "sourceRow": 4,
+          "estimatedDifficulty": 1,
+          "processing": "原样使用，避免只留下局部立柱。"
+        },
+        {
+          "id": 28,
+          "region": 2,
+          "filename": "IMG_20260917_154955.jpg",
+          "sourceRow": 29,
+          "estimatedDifficulty": 1,
+          "processing": "保留完整建筑，不必遮馆名增加难度。"
+        },
+        {
+          "id": 47,
+          "region": 3,
+          "filename": "2649BE6D13BAEBB0804409DF79660FE1.jpg",
+          "sourceRow": 48,
+          "estimatedDifficulty": 1,
+          "processing": "保留门面，不把顾客人数作为条件。"
+        }
+      ],
+      "grade": 1
+    },
+    {
+      "position": "R3C1",
+      "kind": "photo",
+      "slot": "P13",
+      "photos": [
+        {
+          "id": 22,
+          "region": 1,
+          "filename": "IMG_20260917_153305.jpg",
+          "sourceRow": 23,
+          "estimatedDifficulty": 2,
+          "processing": "保留左侧楼体和下方结构，不裁成纯横梁。"
+        },
+        {
+          "id": 34,
+          "region": 2,
+          "filename": "IMG_20260917_160727.jpg",
+          "sourceRow": 35,
+          "estimatedDifficulty": 2,
+          "processing": "保持文字可读；如担心同品牌门店歧义，提供B1范围提示。"
+        },
+        {
+          "id": 61,
+          "region": 3,
+          "filename": "IMG_20260917_183749.jpg",
+          "sourceRow": 62,
+          "estimatedDifficulty": 2,
+          "processing": "保留门头；裁减下方人物时不能切掉产品墙边界。"
+        }
+      ],
+      "grade": 2
+    },
+    {
+      "position": "R3C2",
+      "kind": "photo",
+      "slot": "P14",
+      "photos": [
+        {
+          "id": 23,
+          "region": 1,
+          "filename": "IMG_20260917_153450.jpg",
+          "sourceRow": 24,
+          "estimatedDifficulty": 2,
+          "processing": "保留成对灯和远景；不要求花卉种类与天空一致。"
+        },
+        {
+          "id": 37,
+          "region": 2,
+          "filename": "IMG_20260917_162312.jpg",
+          "sourceRow": 38,
+          "estimatedDifficulty": 2,
+          "processing": "保留门店背景；允许人物和散货不同。"
+        },
+        {
+          "id": 65,
+          "region": 3,
+          "filename": "IMG_20260917_185043.jpg",
+          "sourceRow": 66,
+          "estimatedDifficulty": 2,
+          "processing": "保留表形钟和红框，不裁成纯品牌字。"
+        }
+      ],
+      "grade": 2
+    },
+    {
+      "position": "R3C3",
+      "kind": "direct",
+      "slot": "D03",
+      "photos": [],
+      "grade": null
+    },
+    {
+      "position": "R3C4",
+      "kind": "photo",
+      "slot": "P16",
+      "photos": [
+        {
+          "id": 1,
+          "region": 1,
+          "filename": "44BED50454606443DD7360525C1CA5BB.jpg",
+          "sourceRow": 2,
+          "estimatedDifficulty": 3,
+          "processing": "原图保留。题面强调匹配黑板所在角落与架子，不要求临时手绘内容逐笔一致。"
+        },
+        {
+          "id": 30,
+          "region": 2,
+          "filename": "IMG_20260917_155633.jpg",
+          "sourceRow": 31,
+          "estimatedDifficulty": 3,
+          "processing": "保留整段涂鸦和灰门，不只截ZPARK名字。"
+        },
+        {
+          "id": 57,
+          "region": 3,
+          "filename": "IMG_20260917_182807.jpg",
+          "sourceRow": 58,
+          "estimatedDifficulty": 3,
+          "processing": "完整原图可缩放；提供左右两段放大视图作为同一题的补充，不能变成两格。若仍无固定锚点应补拍。"
+        }
+      ],
+      "grade": 3
+    },
+    {
+      "position": "R3C5",
+      "kind": "direct",
+      "slot": "D04",
+      "photos": [],
+      "grade": null
+    },
+    {
+      "position": "R4C1",
+      "kind": "photo",
+      "slot": "P18",
+      "photos": [
+        {
+          "id": 7,
+          "region": 1,
+          "filename": "IMG_20260917_145305.jpg",
+          "sourceRow": 8,
+          "estimatedDifficulty": 3,
+          "processing": "保留店名，不通过遮店名额外增难；不要求进餐厅。"
+        },
+        {
+          "id": 35,
+          "region": 2,
+          "filename": "IMG_20260917_160959.jpg",
+          "sourceRow": 36,
+          "estimatedDifficulty": 3,
+          "processing": "保留蓝横梁及上层边缘，不能只给球场中央。"
+        },
+        {
+          "id": 64,
+          "region": 3,
+          "filename": "IMG_20260917_184644.jpg",
+          "sourceRow": 65,
+          "estimatedDifficulty": 3,
+          "processing": "保留圆桶阵列与黄色小人牌，裁去底部手指无需修补桶体。"
+        }
+      ],
+      "grade": 3
+    },
+    {
+      "position": "R4C2",
+      "kind": "direct",
+      "slot": "D05",
+      "photos": [],
+      "grade": null
+    },
+    {
+      "position": "R4C3",
+      "kind": "photo",
+      "slot": "P06",
+      "photos": [
+        {
+          "id": 21,
+          "region": 1,
+          "filename": "IMG_20260917_152919.jpg",
+          "sourceRow": 22,
+          "estimatedDifficulty": 1,
+          "processing": "原样使用，不要求消费，不以排队顾客位置为复刻依据。"
+        },
+        {
+          "id": 40,
+          "region": 2,
+          "filename": "IMG_20260917_162832.jpg",
+          "sourceRow": 41,
+          "estimatedDifficulty": 1,
+          "processing": "保留店招和门面边界，家具摆放无需完全一致。"
+        },
+        {
+          "id": 63,
+          "region": 3,
+          "filename": "IMG_20260917_184223.jpg",
+          "sourceRow": 64,
+          "estimatedDifficulty": 1,
+          "processing": "处理版只裁取上方门头与天花，并水平翻转恢复可读文字；不生成被人物挡住的店内细节。"
+        }
+      ],
+      "grade": 1
+    },
+    {
+      "position": "R4C4",
+      "kind": "photo",
+      "slot": "P08",
+      "photos": [
+        {
+          "id": 12,
+          "region": 1,
+          "filename": "IMG_20260917_150825.jpg",
+          "sourceRow": 13,
+          "estimatedDifficulty": 2,
+          "processing": "保留塔顶与底部边缘，不能只给天空或玻璃格纹。"
+        },
+        {
+          "id": 42,
+          "region": 2,
+          "filename": "IMG_20260917_163342.jpg",
+          "sourceRow": 43,
+          "estimatedDifficulty": 2,
+          "processing": "保留前景栏杆和楼群组合。"
+        },
+        {
+          "id": 53,
+          "region": 3,
+          "filename": "F50DF9D4594520DCB9A99DF66622803C.jpg",
+          "sourceRow": 54,
+          "estimatedDifficulty": 2,
+          "processing": "保留名称和箭头，不只留通用上行符号。"
+        }
+      ],
+      "grade": 2
+    },
+    {
+      "position": "R4C5",
+      "kind": "photo",
+      "slot": "P10",
+      "photos": [
+        {
+          "id": 14,
+          "region": 1,
+          "filename": "IMG_20260917_151237.jpg",
+          "sourceRow": 15,
+          "estimatedDifficulty": 2,
+          "processing": "保留两侧墙与底部门面，勿只截取楼梯。"
+        },
+        {
+          "id": 45,
+          "region": 2,
+          "filename": "IMG_20260917_164413.jpg",
+          "sourceRow": 46,
+          "estimatedDifficulty": 2,
+          "processing": "保留交叉网架，不只截拱门；不要求走入机动车道拍照。"
+        },
+        {
+          "id": 62,
+          "region": 3,
+          "filename": "IMG_20260917_184124.jpg",
+          "sourceRow": 63,
+          "estimatedDifficulty": 2,
+          "processing": "保留转角与两段文字，不裁成单词。"
+        }
+      ],
+      "grade": 2
+    },
+    {
+      "position": "R5C1",
+      "kind": "photo",
+      "slot": "P07",
+      "photos": [
+        {
+          "id": 9,
+          "region": 1,
+          "filename": "IMG_20260917_145934.jpg",
+          "sourceRow": 10,
+          "estimatedDifficulty": 2,
+          "processing": "原样使用；审核核对楼层及观景方向，不只核对电梯。"
+        },
+        {
+          "id": 43,
+          "region": 2,
+          "filename": "IMG_20260917_163619.jpg",
+          "sourceRow": 44,
+          "estimatedDifficulty": 2,
+          "processing": "不遮鳄鱼，不只裁logo；保留墙与红扶手。"
+        },
+        {
+          "id": 60,
+          "region": 3,
+          "filename": "IMG_20260917_183538.jpg",
+          "sourceRow": 61,
+          "estimatedDifficulty": 2,
+          "processing": "保持全部九朵云和店名，不必遮名增难。"
+        }
+      ],
+      "grade": 2
+    },
+    {
+      "position": "R5C2",
+      "kind": "photo",
+      "slot": "P03",
+      "photos": [
+        {
+          "id": 10,
+          "region": 1,
+          "filename": "IMG_20260917_150543.jpg",
+          "sourceRow": 11,
+          "estimatedDifficulty": 1,
+          "processing": "保留招牌和地下入口，不只裁文字。"
+        },
+        {
+          "id": 39,
+          "region": 2,
+          "filename": "IMG_20260917_162622.jpg",
+          "sourceRow": 40,
+          "estimatedDifficulty": 1,
+          "processing": "标识不能打码，保留门框。"
+        },
+        {
+          "id": 50,
+          "region": 3,
+          "filename": "95C2D53AC1A597C4A29F5705B7B9C8DB.jpg",
+          "sourceRow": 51,
+          "estimatedDifficulty": 1,
+          "processing": "原样使用，不只给通用商品。"
+        }
+      ],
+      "grade": 1
+    },
+    {
+      "position": "R5C3",
+      "kind": "photo",
+      "slot": "P15",
+      "photos": [
+        {
+          "id": 24,
+          "region": 1,
+          "filename": "IMG_20260917_153544.jpg",
+          "sourceRow": 25,
+          "estimatedDifficulty": 2,
+          "processing": "保留柱和顶棚，不仅截取柱上文字。"
+        },
+        {
+          "id": 31,
+          "region": 2,
+          "filename": "IMG_20260917_155945.jpg",
+          "sourceRow": 32,
+          "estimatedDifficulty": 2,
+          "processing": "保留店名与柜台，保证能从公开顾客区域完成。"
+        },
+        {
+          "id": 56,
+          "region": 3,
+          "filename": "IMG_20260917_182446.jpg",
+          "sourceRow": 57,
+          "estimatedDifficulty": 2,
+          "processing": "优先裁去左侧人物但保留右边招牌与展板框架；仍看不到完整地点时补拍。"
+        }
+      ],
+      "grade": 2
+    },
+    {
+      "position": "R5C4",
+      "kind": "direct",
+      "slot": "D06",
+      "photos": [],
+      "grade": null
+    },
+    {
+      "position": "R5C5",
+      "kind": "photo",
+      "slot": "P09",
+      "photos": [
+        {
+          "id": 13,
+          "region": 1,
+          "filename": "IMG_20260917_151053.jpg",
+          "sourceRow": 14,
+          "estimatedDifficulty": 2,
+          "processing": "保持球体全貌，仍按原表中级处理。"
+        },
+        {
+          "id": 41,
+          "region": 2,
+          "filename": "IMG_20260917_163042.jpg",
+          "sourceRow": 42,
+          "estimatedDifficulty": 2,
+          "processing": "用红色主雕塑作为审核锚点，前方卡通形象不必一致。"
+        },
+        {
+          "id": 59,
+          "region": 3,
+          "filename": "IMG_20260917_183347.jpg",
+          "sourceRow": 60,
+          "estimatedDifficulty": 2,
+          "processing": "完整保留B2柱作为固定锚点。"
+        }
+      ],
+      "grade": 2
+    }
+  ],
+  "photoDisplayTransforms": {
+    "49": {
+      "kind": "mask",
+      "rectangles": [
+        [
+          0.324,
+          0.829,
+          0.211,
+          0.076
+        ]
+      ],
+      "note": "只遮店名文字，保留黑色图腾、黄色灯墙、竹纹和原图中的全部结构。"
+    },
+    "55": {
+      "kind": "mask",
+      "rectangles": [
+        [
+          0,
+          0.023,
+          0.073,
+          0.073
+        ],
+        [
+          0.366,
+          0.024,
+          0.167,
+          0.075
+        ],
+        [
+          0.852,
+          0.025,
+          0.148,
+          0.071
+        ],
+        [
+          0.328369140625,
+          0.4749348958333333,
+          0.064208984375,
+          0.07714843750000006
+        ],
+        [
+          0.413330078125,
+          0.4781901041666667,
+          0.02685546875,
+          0.07421874999999994
+        ],
+        [
+          0.461669921875,
+          0.4772135416666667,
+          0.050048828125,
+          0.07454427083333331
+        ],
+        [
+          0.529052734375,
+          0.478515625,
+          0.0361328125,
+          0.07486979166666663
+        ],
+        [
+          0.5966796875,
+          0.478515625,
+          0.052001953125,
+          0.07552083333333337
+        ]
+      ],
+      "note": "遮重复店名及中央五个字母；A/X、各字母发光边框及大矩形霓虹均保留。"
+    },
+    "63": {
+      "kind": "crop",
+      "bounds": [
+        0,
+        0,
+        0.48,
+        0.24
+      ],
+      "flipX": true,
+      "note": "仅截原图左上角并水平翻转。被人物挡住的店内区域不补画。"
+    }
+  },
+  "originalAssetFolder": "原始图片"
+}

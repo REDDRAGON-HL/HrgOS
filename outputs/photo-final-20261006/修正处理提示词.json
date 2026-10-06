@@ -1,0 +1,14 @@
+[
+  {
+    "id": 63,
+    "prompt": "Use case: precise-object-edit. Image 1 is original selfie photo; Image 2 ONLY badge typography reference. Produce a STRICT REAL CROP of ONLY THE ORIGINAL TOP-LEFT rectangle: left 0%, right 49.3% of source width, top 0%, bottom 25.6% of source height. This rectangle contains actual photographed green polygon ceiling, hanging bulbs and visible Saizeriya sign, but NO foreground faces. Output crop ratio approximately 2.57:1. Horizontally flip this cropped rectangle as a whole to restore reversed signage. Do not recreate, reconstruct, retouch away people or invent restaurant interiors. Do NOT output the full selfie. Do NOT merely rewrite letters without flipping geometry. NO outpainting or extending any crop edge. Keep photographed textures, exact ceiling polygons and lamps. Only gently increase contrast. Finally overlay ONE chubby 3D \"#6\" in BOTTOM RIGHT, cream glossy front, orange extrusion, navy outline same as Image 2; replace reference #19 with #6. Number height about 12% of crop height with 3% padding, no plaque. Do not cover main sign. Output just final cropped photo with #6.",
+    "path": "C:\\Users\\24175\\.codex\\generated_images\\01a10f5d-ddd5-7af2-8568-da552f0c6888\\exec-b890048c-50f0-43d0-9dc3-99da05e5393c.png",
+    "replacedPath": "C:\\Users\\24175\\.codex\\generated_images\\01a10f5d-ddd5-7af2-8568-da552f0c6888\\exec-e361d497-6b60-4c92-8b72-9a8989867bfd.png"
+  },
+  {
+    "id": 57,
+    "prompt": "Use case: lighting-weather. Image 1 is ONLY original real panorama edit target; Image 2 ONLY number reference. Preserve ENTIRE original panorama without cropping, stretching, geometrical changes or extending scenery. Original panoramic content ratio 3.587:1. Output a 3:1 canvas containing the entire original panorama centered horizontally, fitted full-width preserving 3.587:1 content ratio, with THIN SOLID DARK NAVY letterbox padding top and bottom, not generated scenery. Every source feature at exact source relative positions, all real left and right edges retained. Gently lift shadows and control highlights, no restyling scene layout. No new floor or sky. Overlay exactly ONE puffy 3D \"#16\" in bottom RIGHT mostly inside original photo, small height 12% of original photo height, 3% padding. Cream glossy front, orange extrusion, navy outline match Image2 but replace its #19 with #16. No other lettering or objects. No changes to any original sign, furniture or people. No opaque plaque.",
+    "path": "C:\\Users\\24175\\.codex\\generated_images\\01a10f5d-ddd5-7af2-8568-da552f0c6888\\exec-8ab90790-de6d-4c32-9b65-183aefb3001d.png",
+    "replacedPath": "C:\\Users\\24175\\.codex\\generated_images\\01a10f5d-ddd5-7af2-8568-da552f0c6888\\exec-f574dada-9a27-499f-835d-61894522de1a.png"
+  }
+]

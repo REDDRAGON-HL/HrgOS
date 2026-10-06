@@ -1,0 +1,100 @@
+{
+  "count": 57,
+  "byRegion": [
+    {
+      "region": 1,
+      "count": 19,
+      "numbers": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19
+      ]
+    },
+    {
+      "region": 2,
+      "count": 19,
+      "numbers": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19
+      ]
+    },
+    {
+      "region": 3,
+      "count": 19,
+      "numbers": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19
+      ]
+    }
+  ],
+  "uniqueSourceCount": 57,
+  "originalCount": 66,
+  "allOriginalsUnchanged": true,
+  "totalBytes": 126229796,
+  "ratioWarnings": [
+    {
+      "id": 63,
+      "region": 3,
+      "number": 6,
+      "sourceRatio": 1.3333333333333333,
+      "outputRatio": 2.5657726692209453
+    },
+    {
+      "id": 57,
+      "region": 3,
+      "number": 16,
+      "sourceRatio": 3.586690017513135,
+      "outputRatio": 3
+    }
+  ]
+}

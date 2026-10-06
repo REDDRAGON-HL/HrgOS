@@ -1,0 +1,46 @@
+{
+  "mode": "built-in image_gen",
+  "status": "五张样稿待用户审阅；其余61张尚未生成；未接入正式题库",
+  "samples": [
+    {
+      "id": 13,
+      "style": "游戏漫画",
+      "prompt": "Edit this exact location photograph into a crisp cel-shaded videogame/comic rendering: bold controlled contour lines, flat three-step shading, muted sand stone and cool blue glass, a few subtle halftone shadows. NOT a fantasy redesign. Keep the original framing and camera angle, exact huge segmented sphere silhouette and panel lattice, glass pedestal, buildings flanking it and ground paving. Keep existing signage in its original location, do not add lettering or graphics. Preserve all physical landmark shapes; no new architecture, scenery or props. This is a location-finding puzzle so faithful geometry is essential.",
+      "source": "D:\\桌面\\Ayowtf\\HrgOS\\artifacts\\photo-review-20261006\\embedded-originals\\13-IMG_20260917_151053.jpg",
+      "generatedSource": "C:\\Users\\24175\\.codex\\generated_images\\01a10f5d-ddd5-7af2-8568-da552f0c6888\\exec-06168116-7f65-481b-b6e9-8aa1300ede68.png",
+      "output": "样稿/13-游戏漫画-v1.png"
+    },
+    {
+      "id": 11,
+      "style": "简笔线稿",
+      "prompt": "Convert this exact photograph to clean black ink line-art on a white background, like a simplified game puzzle illustration, no paper texture. Trace the EXISTING horse mural rather than creating a new horse composition. Keep all visible horses and partial horses in EXACT same positions, poses, proportions, directions and overlapping relationships, including foreground right horse, center front-facing horse and left horses. Keep the right stair balustrade, lower handrail, wall seam and overhead staggered wooden strips as accurate clean outlines. Simplify painted brush textures to fewer lines and some small solid black areas, but do not erase key limbs or redraw the mural as unrelated horses. Same framing and perspective; no new objects or text.",
+      "source": "D:\\桌面\\Ayowtf\\HrgOS\\artifacts\\photo-review-20261006\\embedded-originals\\11-IMG_20260917_150700.jpg",
+      "generatedSource": "C:\\Users\\24175\\.codex\\generated_images\\01a10f5d-ddd5-7af2-8568-da552f0c6888\\exec-8eb23785-4416-40f3-8451-2d2c79e24cc8.png",
+      "output": "样稿/11-简笔线稿-v1.png"
+    },
+    {
+      "id": 51,
+      "style": "RGB故障",
+      "prompt": "Apply a controlled static videogame glitch / RGB split effect to this exact tunnel photo. Preserve photograph content, framing and perspective. Keep every metal arch, ceiling panel, aisle width, advertisement frame, floor reflection and right ramp railing in their exact original positions. Add restrained red/cyan channel fringes only near high-contrast edges, thin CRT scanlines, and 3 to 4 short horizontal digital displacement strips confined to peripheral advertising panels. Central tunnel arches and walkable floor must remain continuous, sharp and readable. Do not add large noise blocks, UI, text, futuristic structures, additional doors or distorted geometry. Visible yet moderate glitch, not merely color grading.",
+      "source": "D:\\桌面\\Ayowtf\\HrgOS\\artifacts\\photo-review-20261006\\embedded-originals\\51-9EFA0D86CC7B12CDE7D7E63DBEC75593.jpg",
+      "generatedSource": "C:\\Users\\24175\\.codex\\generated_images\\01a10f5d-ddd5-7af2-8568-da552f0c6888\\exec-81531054-90d7-416d-8390-80f8b7338d8e.png",
+      "output": "样稿/51-RGB故障-v1.png"
+    },
+    {
+      "id": 49,
+      "style": "局部像素遮挡",
+      "prompt": "Edit ONLY the two lines of brand lettering directly underneath the large black symmetric emblem on the yellow illuminated wall. Cover the Chinese brand name and English DAKOTEA with an obvious compact coarse square pixel mosaic, sampling yellow, brown and black pixels so no complete brand name remains readable. Leave the large black emblem COMPLETELY untouched with its exact complex curls and silhouette. Keep all wall frames, bamboo motifs, people, lighting and camera viewpoint identical to the photograph. Do not stylize the rest, do not create a new emblem, do not crop, no added text. The localized redaction must be clearly visible and its boundary must not overlap the emblem above.",
+      "source": "D:\\桌面\\Ayowtf\\HrgOS\\artifacts\\photo-review-20261006\\embedded-originals\\49-918F374D8AAD3A8FD22801C0FFDC84B0.jpg",
+      "generatedSource": "C:\\Users\\24175\\.codex\\generated_images\\01a10f5d-ddd5-7af2-8568-da552f0c6888\\exec-c132cdca-cdb0-4511-b545-fbd59bcfeed3.png",
+      "output": "样稿/49-局部像素遮挡-v1.png"
+    },
+    {
+      "id": 35,
+      "style": "橙色保留",
+      "prompt": "Apply a precise selective-color treatment to this exact basketball court photograph: convert everything to neutral black and white EXCEPT the already-orange court boundary and orange rectangular paint areas, which remain vivid original orange. Preserve this unusual high viewpoint, original tilt, full crop, the exact black-and-orange court pattern, seams, column locations and top horizontal beam blocking part of the far hoop. Convert blue beam to gray; do NOT remove it or reveal what it hides. Preserve geometry pixel-faithfully, no perspective correction or conventional court lines added, no new words/props. Crisp photographic output, subtle contrast lift, not an illustration.",
+      "source": "D:\\桌面\\Ayowtf\\HrgOS\\artifacts\\photo-review-20261006\\embedded-originals\\35-IMG_20260917_160959.jpg",
+      "generatedSource": "C:\\Users\\24175\\.codex\\generated_images\\01a10f5d-ddd5-7af2-8568-da552f0c6888\\exec-31c4b0f3-f18f-44b5-8d03-bfed2ea2a9c3.png",
+      "output": "样稿/35-橙色保留-v1.png"
+    }
+  ]
+}

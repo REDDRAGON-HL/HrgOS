@@ -1,0 +1,23 @@
+{
+  "records": 66,
+  "regions": [
+    25,
+    21,
+    20
+  ],
+  "samples": 5,
+  "notGenerated": 61,
+  "originalHashMatches": 66,
+  "originalsModified": 0,
+  "existingSharedMappingChanged": false,
+  "applicationChanged": false,
+  "htmlEmbeddedPreviews": true,
+  "sampleIds": [
+    13,
+    11,
+    51,
+    49,
+    35
+  ],
+  "htmlBytes": 7153155
+}

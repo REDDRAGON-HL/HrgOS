@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#101424">
+  <title>HRG · 五队 Bingo 角色美术预览</title>
+  <link rel="stylesheet" href="event.css?rev=staff-region-1">
+  <link rel="stylesheet" href="team-frames.css?rev=1">
+  <script src="event.js?rev=staff-region-1" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#board">跳到任务棋盘</a>
+  <main class="event-page" id="event-page">
+    <h1 class="sr-only">五队 Bingo 角色美术预览</h1>
+    <header class="event-hud">
+      <div class="team-counter" aria-label="当前队伍序号"><b id="team-counter">01</b><span>/ 05</span></div>
+      <div class="hud-metrics" id="hud-metrics"></div>
+      <button class="icon-button motion-toggle" id="motion-toggle" type="button" aria-label="暂停动效" aria-pressed="false"></button>
+    </header>
+    <section class="event-stage" aria-label="队伍棋盘切换">
+      <div class="side-echo side-echo--left" aria-hidden="true"></div>
+      <div class="side-echo side-echo--right" aria-hidden="true"></div>
+      <article class="board-scene" id="board-scene">
+        <div class="board-shell">
+          <img class="edge-art" id="team-frame" src="assets/frame-phigros.svg" alt="" aria-hidden="true" width="1000" height="1000">
+          <div class="board-core">
+            <div class="board-head">
+              <ol class="region-tabs" aria-label="本队区域进度，仅工作人员审核通过后推进"></ol>
+              <div class="progress-mini" aria-label="已完成 6 个，共 25 个任务"><span id="progress-icon"></span><b>06</b><span>/25</span></div>
+            </div>
+            <div class="board-grid" id="board" role="group" tabindex="-1"></div>
+            <div class="board-foot" aria-label="19 个图寻任务，6 个直接任务"><span id="photo-count"></span><b>19</b><span class="foot-divider"></span><span id="direct-count"></span><b>06</b></div>
+          </div>
+        </div>
+        <div class="mascot-plinth" aria-hidden="true"></div>
+        <img class="team-mascot" id="team-mascot" src="assets/geopelia.webp" alt="Phigros 队的鸠，二头身形象" width="600" height="650">
+      </article>
+    </section>
+    <nav class="team-controls" aria-label="切换队伍">
+      <button class="icon-button team-prev" id="prev" type="button" aria-label="上一队"></button>
+      <div class="team-tabs" id="team-tabs"></div>
+      <button class="icon-button team-next" id="next" type="button" aria-label="下一队"></button>
+    </nav>
+    <p class="sr-only" id="team-announcement" role="status" aria-live="polite" aria-atomic="true"></p>
+  </main>
+  <dialog class="clue-dialog" id="clue-dialog" aria-labelledby="clue-title">
+    <header><h2 id="clue-title"></h2><button class="icon-button" id="close-clue" type="button" aria-label="关闭任务详情"></button></header>
+    <div id="clue-body"></div>
+    <p class="detail-note">本页仅为美术预览。正式任务内容以后端配置为准，不提交比赛数据。</p>
+  </dialog>
+</body>
+</html>

@@ -1,0 +1,17 @@
+[
+  {
+    "id": 49,
+    "file": "49-918F374D8AAD3A8FD22801C0FFDC84B0.jpg",
+    "prompt": "Edit target: the attached original real location photograph. Use case precise-object-edit. This is a real-world location finding puzzle, NOT artistic enhancement. Preserve the exact photo, camera, dimensions/aspect, colors, logo geometry, bamboo drawings, wall frame and every other scene detail. Only add ONE obvious opaque neutral gray rectangular censor overlay to cover the Chinese brand name 麒麟大口茶 and the English DAKOTEA underneath the black logo (approximately x32%-53%, y82%-92% in the image). Cover only these text rows. Leave the large black emblem entirely unchanged and fully visible, including its bottom edge. Do not remove any person or reconstruct anything. Do not beautify, paint, re-light, denoise, or change perspective. Return the same photograph with this one flat censor block; no captions, no border."
+  },
+  {
+    "id": 55,
+    "file": "55-IMG_20260917_182029.jpg",
+    "prompt": "Edit target: attached original real photograph of ANIPLEX neon installation. Use case precise-object-edit. Real location puzzle; retain the exact original photo and geometry, colors, reflections, vertical wall stripes, and every pink/purple luminous rectangular frame. Only add explicit opaque gray censor rectangles over the repeated ANIPLEX lettering in the top black horizontal strip (three occurrences), and tiny separate censor rectangles over only the central letters N, I, P, L, E in the large six-letter logo. Keep A and X completely visible as weak clues. Each central censor must only cover its glyph inside its existing polygon panel, not any surrounding luminous polygon edge or multicolor concentric border. Preserve all scene content outside the rectangular overlays unchanged. No inpainting, no fabricated walls, no removals of people in reflection, no artistic redesign, no captions. Return one original photograph with straightforward visible censor overlays."
+  },
+  {
+    "id": 63,
+    "file": "63-IMG_20260917_184223.jpg",
+    "prompt": "Edit target: attached original selfie in front of Saizeriya restaurant. Use case precise-object-edit. Real-world location finding puzzle. ONLY perform a literal crop of the original upper-left background: approximately original x0%-48%, y0%-24%, showing the green polygonal ceiling and mirrored restaurant sign 亚莉萨/萨莉亚 and as much of the true adjacent doorway as naturally fits. Then horizontally flip that cropped rectangle so the existing restaurant lettering is readable. Exclude the two main foreground faces by cropping; do NOT erase people, do NOT fill any hidden area, and do NOT reconstruct the restaurant. Preserve the exact photograph pixels and original scene details within that crop, the original lights and sign characters, no beautification or perspective change, no new text, no border. Return the cropped horizontal background photograph only, aspect ratio approximately 2.67:1."
+  }
+]
