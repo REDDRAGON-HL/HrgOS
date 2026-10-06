@@ -9,13 +9,13 @@ const fixtures: readonly LoginAccount[] = [
 ];
 
 describe("活动账号登录权限", () => {
-  it("报名名单对应 5 队，每队 3 人；工作人员不参与分组", () => {
+  it("报名名单按志愿分为 4、2、2、4、3 人的五队；工作人员不参与分组", () => {
     const expected = [
-      ["team-1", ["fuqi01", "sendaotianling02", "rsyuanyuan13"]],
-      ["team-2", ["huanying04", "forzxol08", "wangjiarui11"]],
-      ["team-3", ["xtm06", "banyuehe09", "zenithceleste15"]],
-      ["team-4", ["lingjunzimei07", "fidrop12", "yingchuanbai14"]],
-      ["team-5", ["phony03", "chunye05", "headphoneline10"]]
+      ["team-1", ["fuqi01", "sendaotianling02", "banyuehe09", "forzxol08"]],
+      ["team-2", ["huanying04", "wangjiarui11"]],
+      ["team-3", ["xtm06", "zenithceleste15"]],
+      ["team-4", ["phony03", "lingjunzimei07", "fidrop12", "yingchuanbai14"]],
+      ["team-5", ["headphoneline10", "chunye05", "rsyuanyuan13"]]
     ] as const;
     for (const [teamId, usernames] of expected) {
       expect(loginAccounts.filter((account) => account.teamId === teamId).map((account) => account.username))

@@ -9,7 +9,7 @@ export interface LoginAccount {
 }
 
 // Frontend prototype allowlist; plaintext passwords are kept outside the served assets.
-// Registration roster: five teams with three players each.
+// Registration roster: five teams of 4, 2, 2, 4 and 3 players, based on preferences and experience.
 export const loginAccounts: readonly LoginAccount[] = [
   {
     "role": "staff",
@@ -51,10 +51,17 @@ export const loginAccounts: readonly LoginAccount[] = [
   },
   {
     "role": "player",
-    "username": "phony03",
-    "teamId": "team-5",
-    "salt": "8a61c2fdeeac9e46936eca7bd6fce180",
-    "passwordHash": "fba45cd91ae3bb1b1326c541ec7e51a2a8c3c6eac75ee2ecc2c86b7ef5673263"
+    "username": "banyuehe09",
+    "teamId": "team-1",
+    "salt": "03a2e12f9c31f062d1af4a2d50db6567",
+    "passwordHash": "2a2edbe1deb5fac938d6568a53b4f49d989d8c2d088b94fd49778af8bcda6325"
+  },
+  {
+    "role": "player",
+    "username": "forzxol08",
+    "teamId": "team-1",
+    "salt": "4e27f293ac56565011678b39610ab145",
+    "passwordHash": "25926af593626357e8b673fadd9b1117269319f71b7d8df4173f415d69891384"
   },
   {
     "role": "player",
@@ -65,10 +72,10 @@ export const loginAccounts: readonly LoginAccount[] = [
   },
   {
     "role": "player",
-    "username": "chunye05",
-    "teamId": "team-5",
-    "salt": "ba0ec6bf455cfadb26892068c8bc47af",
-    "passwordHash": "608a85ddf87900c3d0b4694c99d13e391aca2422f28ff99084dd294b7369c7ad"
+    "username": "wangjiarui11",
+    "teamId": "team-2",
+    "salt": "7b5a02a6e679816f28bc9847caaf3042",
+    "passwordHash": "19a84dbb2acf5f266fff8882c135bea35000e016d195a0c1e2bfd9b0339f8b35"
   },
   {
     "role": "player",
@@ -79,38 +86,24 @@ export const loginAccounts: readonly LoginAccount[] = [
   },
   {
     "role": "player",
+    "username": "zenithceleste15",
+    "teamId": "team-3",
+    "salt": "460cd797ee390d4229aa8d26acdb6516",
+    "passwordHash": "63370e78fb815eaaea3f31c5e3edab99239c624a360bb84aed8583f13af24f43"
+  },
+  {
+    "role": "player",
+    "username": "phony03",
+    "teamId": "team-4",
+    "salt": "8a61c2fdeeac9e46936eca7bd6fce180",
+    "passwordHash": "fba45cd91ae3bb1b1326c541ec7e51a2a8c3c6eac75ee2ecc2c86b7ef5673263"
+  },
+  {
+    "role": "player",
     "username": "lingjunzimei07",
     "teamId": "team-4",
     "salt": "224834ec9455f08a6cfb2e8d0ecc0930",
     "passwordHash": "67c9dc43d8c3f6d88de9bb7fc24380d52acba51e993bf5ef5de1570ec0e0173a"
-  },
-  {
-    "role": "player",
-    "username": "forzxol08",
-    "teamId": "team-2",
-    "salt": "4e27f293ac56565011678b39610ab145",
-    "passwordHash": "25926af593626357e8b673fadd9b1117269319f71b7d8df4173f415d69891384"
-  },
-  {
-    "role": "player",
-    "username": "banyuehe09",
-    "teamId": "team-3",
-    "salt": "03a2e12f9c31f062d1af4a2d50db6567",
-    "passwordHash": "2a2edbe1deb5fac938d6568a53b4f49d989d8c2d088b94fd49778af8bcda6325"
-  },
-  {
-    "role": "player",
-    "username": "headphoneline10",
-    "teamId": "team-5",
-    "salt": "106f57824b7a0befacddcad0e01ffe46",
-    "passwordHash": "896f56a9927bfe07e7376e9f229043e7df1eb669063ee9782031a557bc585317"
-  },
-  {
-    "role": "player",
-    "username": "wangjiarui11",
-    "teamId": "team-2",
-    "salt": "7b5a02a6e679816f28bc9847caaf3042",
-    "passwordHash": "19a84dbb2acf5f266fff8882c135bea35000e016d195a0c1e2bfd9b0339f8b35"
   },
   {
     "role": "player",
@@ -121,13 +114,6 @@ export const loginAccounts: readonly LoginAccount[] = [
   },
   {
     "role": "player",
-    "username": "rsyuanyuan13",
-    "teamId": "team-1",
-    "salt": "f1c4cefdd18e69d26f9e83f7c2d1fadc",
-    "passwordHash": "66025629a165e23b6ac2afe5ddf1861ba11c30df018162dbcd256ee54eb5c29e"
-  },
-  {
-    "role": "player",
     "username": "yingchuanbai14",
     "teamId": "team-4",
     "salt": "4fd1eab9ca0bec824f64ef048c87367f",
@@ -135,9 +121,23 @@ export const loginAccounts: readonly LoginAccount[] = [
   },
   {
     "role": "player",
-    "username": "zenithceleste15",
-    "teamId": "team-3",
-    "salt": "460cd797ee390d4229aa8d26acdb6516",
-    "passwordHash": "63370e78fb815eaaea3f31c5e3edab99239c624a360bb84aed8583f13af24f43"
+    "username": "headphoneline10",
+    "teamId": "team-5",
+    "salt": "106f57824b7a0befacddcad0e01ffe46",
+    "passwordHash": "896f56a9927bfe07e7376e9f229043e7df1eb669063ee9782031a557bc585317"
+  },
+  {
+    "role": "player",
+    "username": "chunye05",
+    "teamId": "team-5",
+    "salt": "ba0ec6bf455cfadb26892068c8bc47af",
+    "passwordHash": "608a85ddf87900c3d0b4694c99d13e391aca2422f28ff99084dd294b7369c7ad"
+  },
+  {
+    "role": "player",
+    "username": "rsyuanyuan13",
+    "teamId": "team-5",
+    "salt": "f1c4cefdd18e69d26f9e83f7c2d1fadc",
+    "passwordHash": "66025629a165e23b6ac2afe5ddf1861ba11c30df018162dbcd256ee54eb5c29e"
   }
 ];
