@@ -44,7 +44,7 @@ export default function TestLab() {
     <main className="rule-lab" id="main-content">
       <header className="rule-lab__header"><div><p className="eyebrow">HRG // INTEGRATION LAB</p><h1>一键规则联调</h1><p>连接异地测试后端，验证登录、区域审核、原图、计分、卡牌、事件、定位与完赛。每次建立独立测试赛局，结束后清理。</p></div><a href="/">返回登录页</a></header>
       <section className="rule-lab__config" aria-label="测试配置">
-        <div className="rule-lab__actions"><button className="button button--primary" disabled={running || key.length < 32} onClick={() => { void start('abilities'); }}>一键测试 22 张能力卡</button><a href="/?live=cards&training=1">打开能力卡联调界面</a></div>
+        <div className="rule-lab__actions"><button className="button button--primary" disabled={running || key.length < 32} onClick={() => { void start('abilities'); }}>一键测试 24 张能力卡</button><a href="/?live=cards&training=1">打开能力卡联调界面</a></div>
         <label>后端地址<input type="url" value={baseUrl} onChange={event => setBaseUrl(event.target.value)} disabled={running} placeholder="https://test-api.example.com" /></label>
         <label>测试访问密钥<input type="password" value={key} onChange={event => setKey(event.target.value)} disabled={running} autoComplete="off" placeholder="粘贴服务器 TEST_API_KEY" /></label>
         <label className="rule-lab__device"><input type="checkbox" checked={realDevices} onChange={event => setRealDevices(event.target.checked)} disabled={running} />同时检查本机 GPS 和相机权限；定位将写入独立测试赛局，相机画面不上传。</label>

@@ -1,6 +1,6 @@
 import { createHash, randomUUID } from 'node:crypto';
 import sharp from 'sharp';
-import { abilityCommand, abilityView, abilityTick, abilityScoreAccess, abilityLocation, abilityResultView, taskPermissions, abilityTaskReviewed } from './abilityCards.mjs';
+import { abilityCommand, abilityView, abilityTick, abilityScoreAccess, abilityLocation, abilityResultView, taskPermissions, abilityTaskReviewed, validateReserveTasks } from './abilityCards.mjs';
 
 export class RuleError extends Error {
   constructor(code, message = code, statusCode = 409) { super(message); this.code = code; this.statusCode = statusCode; }
@@ -118,8 +118,9 @@ export async function executeCommand(state, actor, command, key) {
     const tasks = command.tasks;
     requireRule(Array.isArray(tasks) && tasks.length === 25 && new Set(tasks.map(task => task.id)).size === 25 && tasks.every(task => typeof task.id === 'string' && /^[A-Za-z0-9_-]{1,40}$/.test(task.id) && typeof task.title === 'string' && task.title.trim() && task.title.length <= 100 && typeof task.brief === 'string' && task.brief.trim() && task.brief.length <= 2000 && Number.isSafeInteger(task.points) && task.points > 0 && task.points <= 10000), 'TASK_CONFIG_INVALID', 400);
     const rewards = command.boardRewards ?? [];
+    const reserveTasks = validateReserveTasks(command.reserveTasks ?? state.config.reserveTasks ?? [], tasks, requireRule);
     requireRule(Array.isArray(rewards) && rewards.every(reward => Array.isArray(reward.tasks) && reward.tasks.length && reward.tasks.every(id => tasks.some(task => task.id === id)) && Number.isSafeInteger(reward.points) && reward.points >= 0 && reward.points <= 10000), 'REWARD_CONFIG_INVALID', 400);
-    state.configHistory.push(structuredClone(state.config)); state.config.tasks = tasks.map(({ id, title, brief, points }) => ({ id, title, brief, points, image: '/hrg-mark.svg' })); state.config.boardRewards = rewards; state.config.version++; state.configured = true;
+    state.configHistory.push(structuredClone(state.config)); state.config.tasks = tasks.map(({ id, title, brief, points }) => ({ id, title, brief, points, image: '/hrg-mark.svg' })); state.config.reserveTasks = reserveTasks; state.config.boardRewards = rewards; state.config.version++; state.configured = true;
     result = { configured: true, version: state.config.version };
   } else if (command.type.startsWith('ability_')) {
     result = abilityResultView(await abilityCommand(state, actor, command, { requireRule, manage, requireRunning, elapsed, score, credit, message, ranking, prepareMedia: (state, input, teamId) => prepareMedia(state, input, teamId, true) }), actor);

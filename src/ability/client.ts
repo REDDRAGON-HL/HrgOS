@@ -9,7 +9,8 @@ const messages: Record<string, string> = {
   ABILITY_FINISH_BLOCKED: '还有未处理的能力卡，请先确认、结算或填写原因终止效果。', GAME_PAUSED: '比赛已暂停，请由工作人员继续比赛。', GAME_NOT_RUNNING: '比赛尚未开始或已经结束。',
   NICKNAME_LOCKED_AFTER_START: '昵称在开赛后锁定，请在开赛前保存。', THREE_MEMBERS_REQUIRED: '请选择三位不同的本队注册成员。', COUNTS_REQUIRED: '请逐一填写所有成员实际完成的下蹲次数，范围0到20。',
   PREVIOUS_TASK_REQUIRED: '目标队伍还没有审核通过的普通任务，暂不能要求重演。', TASK_SWAP_INVALID: '只能交换两个不同、未计分、无待审核且未分配的任务。', ASSIGNED_TASK_REQUIRED: '请先完成交换卡指定的下一任务。',
-  ASSIGNMENT_ALREADY_ACTIVE: '其中一队已有待完成的任务分配，请先处理。', TASK_RESTRICTED: '当前需停下或冻结，暂不能提交普通任务。',
+  ASSIGNMENT_ALREADY_ACTIVE: '其中一队已有待完成的任务分配，请先处理。', TASK_RESTRICTED: '当前有任务限制，请先完成能力卡要求。',
+  EXTRA_TASK_UNAVAILABLE: '目标队伍没有尚未抽到的备用任务，请工作人员补充任务池；卡牌未消耗。', RESERVE_TASK_CONFIG_INVALID: '备用任务需使用不同于棋盘的独立编号，并填写标题、要求和正整数分值，最多500项。', EXTRA_TASK_EVIDENCE_REQUIRED: '请先提交额外任务的现场图片或视频，再由工作人员确认完成。',
   CASTER_ALREADY_HIGHEST: '本队已为当前最高分，无法使用榜首援助。', CHOOSE_TIED_HIGHEST: '榜首并列，请选择其中一队。', HIGHEST_CHANGED: '榜首已变化，请打回此申请后重新选择目标。', HIGHEST_TEAM_UNAVAILABLE: '当前最高分队伍已完赛，不能指定其执行这张卡。',
   PHOTO_REQUIRED: '请先提交双方合照。', REDO_EVIDENCE_REQUIRED: '请提交重做任务的现场图片或视频。', TOUCH_EVIDENCE_REQUIRED: '请先核实其他队伍提交的接触图片或视频证据。',
 };

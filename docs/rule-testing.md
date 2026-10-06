@@ -69,7 +69,7 @@ npm run test:lab
 - TC-06：异地服务器异常退出后恢复持久化状态。本机子进程强制退出与重启测试已经实现，远端进程和卷仍需部署后实测。
 - TC-10：正式活动开赛条件，包括生产 API、推送、完整素材与真实设备验收。
 
-测试后端是独立规则沙箱。新增 ?live=cards 比赛界面已经接通正式账号后端校验、卡牌、任务审核和定位，正式赛局保存在独立 hrg_games 表；旧 DemoApp 仍为原型。正式和测试媒体暂存于受权限控制的数据库字段，生产对象存储仍待增加。22 张能力卡测试见 docs/ability-cards.md；部署前后端按 deploy/README.md 配置 GAME_ADMIN_KEY，联调时临时启用 TEST_API_ENABLED。
+测试后端是独立规则沙箱。新增 ?live=cards 比赛界面已经接通正式账号后端校验、卡牌、任务审核和定位，正式赛局保存在独立 hrg_games 表；旧 DemoApp 仍为原型。正式和测试媒体暂存于受权限控制的数据库字段，生产对象存储仍待增加。24 张能力卡测试见 docs/ability-cards.md；部署前后端按 deploy/README.md 配置 GAME_ADMIN_KEY，联调时临时启用 TEST_API_ENABLED。
 
 事件创作、文本收件、最低队伍特殊挑战及区域奖励卡另有“专项功能验收”按钮，缺失功能会标为失败。当前结果及动效修复见 [功能专项验收](feature-readiness.md)；命令行为 `npm run test:readiness:local`，异地为 `npm run test:readiness`。
 

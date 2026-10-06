@@ -24,12 +24,23 @@ const definitions = [
   ['昵称拼词', '随机队伍用三位成员的昵称拼出 hrg 或 awmc，成功加分，失败扣分。', 10, 'random', 5, 5],
   ['圆周率接力', '所有队伍三人协力三十秒内背诵圆周率，背出的小数位数即加分数。', 0.5, 'all', 0, 0],
   ['第九章密钥', '所有队伍在输入框提交第九章密钥，正确答案中最快队伍加分、最慢队伍扣分。', 10, 'all', 5, 5],
+  ['无中生有', '指定队伍从未抽到的备用任务中随机抽取一项，十五分钟内完成并提交证据。', 15, 'other', 0, 5],
+  ['爆裂魔法', '指定队伍所有成员禁言五分钟，只能使用手机打字交流。', 5, 'other', 0, 5],
 ];
 export const abilityCatalog = definitions.map(([title, description, minutes, target, reward, penalty], index) => ({ number: index + 1, title, description, durationMs: minutes * minute, target, reward, penalty, enabled: true, ready: true }));
 export function ensureAbilities(state) {
   state.abilityCatalog ??= structuredClone(abilityCatalog);
+  // 为已持久化的旧赛局补入新增卡，保留工作人员原有配置。
+  for (const definition of abilityCatalog) if (!state.abilityCatalog.some(card => card.number === definition.number)) state.abilityCatalog.push(structuredClone(definition));
   state.abilityCards ??= []; state.abilityUses ??= []; state.abilityConfigHistory ??= []; state.abilityRegionGrants ??= []; state.activeAssignments ??= {};
+  state.config.reserveTasks ??= []; state.abilityExtraDraws ??= [];
 }
+export const validTaskDefinition = task => task && typeof task.id === 'string' && /^[A-Za-z0-9_-]{1,40}$/.test(task.id) && typeof task.title === 'string' && task.title.trim() && task.title.length <= 100 && typeof task.brief === 'string' && task.brief.trim() && task.brief.length <= 2000 && Number.isSafeInteger(task.points) && task.points > 0 && task.points <= 10000;
+export function validateReserveTasks(tasks, boardTasks, check) {
+  check(Array.isArray(tasks) && tasks.length <= 500 && tasks.every(validTaskDefinition) && new Set(tasks.map(task => task.id)).size === tasks.length && tasks.every(task => !boardTasks.some(board => board.id === task.id)), 'RESERVE_TASK_CONFIG_INVALID', 400);
+  return tasks.map(({ id, title, brief, points }) => ({ id, title, brief, points }));
+}
+const extraCandidates = (state, teamId) => state.config.reserveTasks.filter(task => !state.config.tasks.some(board => board.id === task.id) && !state.abilityExtraDraws.some(draw => draw.teamId === teamId && draw.taskId === task.id));
 const gameTime = state => state.elapsedMs + (state.status === 'RUNNING' ? state.now - state.runningSince : 0);
 export const abilityActive = (state, use) => use.status === 'ACTIVE' && use.startedAt != null && gameTime(state) - use.startedAt < use.definition.durationMs;
 export const abilityScoreAccess = (state, teamId) => (state.abilityUses ?? []).some(use => use.number === 3 && use.casterTeamId === teamId && abilityActive(state, use));
@@ -39,7 +50,7 @@ export function abilityTick(state) {
 }
 export function taskPermissions(state, teamId) {
   ensureAbilities(state); const active = state.abilityUses.filter(use => use.targets.includes(teamId) && abilityActive(state, use));
-  return { twoHands: active.some(use => use.number === 8) && !active.some(use => use.number === 18), oneHandOnly: active.some(use => use.number === 18), blockedBy: active.filter(use => [2, 4, 6, 13].includes(use.number)).map(use => use.id) };
+  return { twoHands: active.some(use => use.number === 8) && !active.some(use => use.number === 18), oneHandOnly: active.some(use => use.number === 18), phoneTextOnly: active.some(use => use.number === 24), blockedBy: active.filter(use => [2, 4, 6, 13, 23].includes(use.number)).map(use => use.id) };
 }
 export function abilityTaskReviewed(state, item, services) {
   if (item.kind !== 'task' || !item.status.startsWith('APPROVED')) return;
@@ -59,12 +70,18 @@ export function abilityTaskReviewed(state, item, services) {
 export function abilityView(state, actor) {
   ensureAbilities(state);
   const staff = actor.manage || actor.review;
-  return { abilityCatalog: state.abilityCatalog, abilityCards: state.abilityCards.filter(card => staff || card.teamId === actor.teamId), abilityUses: state.abilityUses.filter(use => staff || use.casterTeamId === actor.teamId || use.targets.includes(actor.teamId) || use.number === 19 && abilityActive(state, use)).map(use => publicUse(use, actor)), huntLocations: state.abilityUses.filter(use => use.number === 19 && abilityActive(state, use)).map(use => ({ teamId: use.casterTeamId, useId: use.id, ...state.locations[use.casterTeamId], online: !!state.locations[use.casterTeamId] && !state.locations[use.casterTeamId].restored && state.now - state.locations[use.casterTeamId].receivedAt < state.config.offlineMs })), activeAssignment: state.activeAssignments[actor.teamId] ?? null, roster: state.accounts.filter(account => account.teamId && (staff || account.teamId === actor.teamId)).map(account => ({ id: account.id, username: account.username, nickname: account.nickname ?? account.username, teamId: account.teamId, leader: !!account.leader })), teamChoices: state.teams.map(team => ({ id: team.id, name: team.name, finished: !!team.finishedAt })) };
+  return { reserveTasks: staff ? state.config.reserveTasks : undefined, abilityCatalog: state.abilityCatalog, abilityCards: state.abilityCards.filter(card => staff || card.teamId === actor.teamId), abilityUses: state.abilityUses.filter(use => staff || use.casterTeamId === actor.teamId || use.targets.includes(actor.teamId) || use.number === 19 && abilityActive(state, use)).map(use => publicUse(use, actor)), huntLocations: state.abilityUses.filter(use => use.number === 19 && abilityActive(state, use)).map(use => ({ teamId: use.casterTeamId, useId: use.id, ...state.locations[use.casterTeamId], online: !!state.locations[use.casterTeamId] && !state.locations[use.casterTeamId].restored && state.now - state.locations[use.casterTeamId].receivedAt < state.config.offlineMs })), activeAssignment: state.activeAssignments[actor.teamId] ?? null, roster: state.accounts.filter(account => account.teamId && (staff || account.teamId === actor.teamId)).map(account => ({ id: account.id, username: account.username, nickname: account.nickname ?? account.username, teamId: account.teamId, leader: !!account.leader })), teamChoices: state.teams.map(team => ({ id: team.id, name: team.name, finished: !!team.finishedAt })) };
 }
 const publicUse = (use, actor) => ({ ...use, evidence: use.evidence.filter(item => actor.manage || actor.review || item.teamId === actor.teamId), anchors: actor.locations ? use.anchors : undefined, returnPosition: actor.locations || use.targets.includes(actor.teamId) ? use.returnPosition : undefined });
 export const abilityResultView = (result, actor) => result.use ? { ...result, use: publicUse(result.use, actor) } : result;
 export async function abilityCommand(state, actor, command, services) {
   ensureAbilities(state); const { requireRule: check, manage } = services;
+  if (command.type === 'ability_reserve_configure') {
+    manage(actor); check(['READY', 'RUNNING', 'PAUSED'].includes(state.status) && command.reason?.trim(), 'CONFIG_INVALID', 400);
+    const tasks = validateReserveTasks(command.tasks, state.config.tasks, check);
+    state.configHistory.push(structuredClone(state.config)); state.config.reserveTasks = tasks; state.config.version++;
+    return { reserveTasks: tasks, version: state.config.version };
+  }
   if (command.type === 'ability_grant') {
     manage(actor); check(command.reason?.trim(), 'REASON_REQUIRED', 400);
     const definition = state.abilityCatalog.find(card => card.number === command.number);
@@ -108,6 +125,7 @@ export async function abilityCommand(state, actor, command, services) {
       targets = [command.targetTeamId];
     }
     check(targets.length, 'TARGET_INVALID', 400);
+    if (card.number === 23) { check(!state.activeAssignments[targets[0]], 'ASSIGNMENT_ALREADY_ACTIVE'); check(extraCandidates(state, targets[0]).length, 'EXTRA_TASK_UNAVAILABLE'); }
     const use = { id: randomUUID(), instanceId: card.id, number: card.number, casterTeamId: actor.teamId, actorId: actor.id, definition, targets, status: 'PENDING', createdAt: state.now, acked: [], evidence: [], results: {}, startedAt: null };
     if (card.number === 14) {
       const historic = state.locationHistory.findLast(point => point.teamId === targets[0] && point.receivedAt <= state.now - 10 * minute);
@@ -175,7 +193,7 @@ export async function abilityCommand(state, actor, command, services) {
     if (use.number === 20 && approved) check(use.evidence.some(item => item.nicknames?.length === 3), 'NICKNAME_EVIDENCE_REQUIRED');
     if (use.number === 19 && !approved) check(use.evidence.some(item => item.teamId !== use.casterTeamId && item.mediaId), 'TOUCH_EVIDENCE_REQUIRED');
     if (approved && [4, 6, 11, 12, 13, 14, 20, 21].includes(use.number) && !abilityActive(state, use)) check(use.evidence.some(item => item.teamId === command.teamId) || command.completedInTime === true, 'TIMELY_COMPLETION_REQUIRED');
-    const sustained = [2, 7, 9, 10, 16, 17, 18, 19].includes(use.number);
+    const sustained = [2, 7, 9, 10, 16, 17, 18, 19, 24].includes(use.number);
     check(!approved || !sustained || gameTime(state) - use.startedAt >= use.definition.durationMs, 'DURATION_NOT_FINISHED');
     let points = approved ? 0 : -use.definition.penalty;
     if (use.number === 6) {
@@ -190,9 +208,14 @@ export async function abilityCommand(state, actor, command, services) {
     }
     if ([19, 20].includes(use.number) && approved) points = use.definition.reward;
     if (use.number === 12 && approved) { check(use.evidence.some(item => item.teamId === command.teamId && item.mediaId), 'REDO_EVIDENCE_REQUIRED'); points = use.redoTask.points * 0.5; }
+    if (use.number === 23 && approved) {
+      check(use.evidence.some(item => item.teamId === command.teamId && item.mediaId), 'EXTRA_TASK_EVIDENCE_REQUIRED');
+      points = use.definition.reward;
+    }
     if (use.number === 21) { check(Number.isSafeInteger(command.verifiedDigits) && command.verifiedDigits >= 0, 'DIGIT_COUNT_REQUIRED', 400); points = approved ? command.verifiedDigits : 0; }
     services.credit(state, command.teamId, points, 'ABILITY', use.id, actor, command.reason);
     use.results[command.teamId] = { approved, points, counts: command.counts, verifiedDigits: command.verifiedDigits, reason: command.reason, actorId: actor.id, at: state.now };
+    if (use.number === 23 && state.activeAssignments[command.teamId]?.useId === use.id) delete state.activeAssignments[command.teamId];
     if (use.targets.every(teamId => use.results[teamId])) use.status = 'DONE';
     services.message(state, command.teamId, 'ability_result', `${use.definition.title}结算 ${points} 分：${command.reason}`, true, use.id);
     return { use, points };
@@ -234,6 +257,7 @@ export async function abilityCommand(state, actor, command, services) {
   if (command.type === 'ability_abort') {
     manage(actor); check(['AWAITING_ACK', 'ACTIVE', 'AWAITING_REVIEW'].includes(use.status) && command.reason?.trim(), 'ABILITY_CANCEL_INVALID');
     use.status = 'CANCELLED'; use.reason = command.reason; use.closedBy = actor.id;
+    for (const [teamId, assignment] of Object.entries(state.activeAssignments)) if (assignment.useId === use.id) delete state.activeAssignments[teamId];
     for (const teamId of use.targets) services.message(state, teamId, 'ability_cancelled', `${use.definition.title}已由工作人员终止：${command.reason}`, true, use.id);
     return { use };
   }
@@ -241,6 +265,13 @@ export async function abilityCommand(state, actor, command, services) {
 }
 
 function activate(state, use, actor, services) {
+  if (use.number === 23) {
+    const teamId = use.targets[0]; services.requireRule(!state.activeAssignments[teamId], 'ASSIGNMENT_ALREADY_ACTIVE');
+    const pool = extraCandidates(state, teamId); services.requireRule(pool.length, 'EXTRA_TASK_UNAVAILABLE');
+    use.extraTask = structuredClone(pool[randomInt(pool.length)]);
+    state.abilityExtraDraws.push({ teamId, taskId: use.extraTask.id, useId: use.id, at: state.now });
+    state.activeAssignments[teamId] = { kind: 'extra', taskId: use.extraTask.id, useId: use.id, task: use.extraTask };
+  }
   const card = state.abilityCards.find(card => card.id === use.instanceId); card.status = 'USED';
   use.confirmedBy = actor.id; use.confirmedAt = state.now;
   if ([3, 8].includes(use.number)) { use.status = 'ACTIVE'; use.startedAt = gameTime(state); }

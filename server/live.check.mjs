@@ -26,7 +26,9 @@ test('正式比赛独立鉴权、必须配置真实任务；账本在重启后�
     await command(host, { type: 'transition', status: 'RUNNING' }, 409);
     await command(player, { type: 'game_configure', tasks: [], reason: '越权' }, 403);
     const tasks = Array.from({ length: 25 }, (_, i) => ({ id: `task${i}`, title: `现场任务 ${i}`, brief: '完成现场指定挑战并拍照', points: 5 }));
-    await command(host, { type: 'game_configure', tasks, reason: '配置赛事任务' }); await command(host, { type: 'transition', status: 'RUNNING' });
+    await command(host, { type: 'game_configure', tasks, reserveTasks: [tasks[0]], reason: '备用池不能包含棋盘任务' }, 400);
+    const reserveTasks = [{ id: 'extra1', title: '额外真实任务', brief: '完成备用挑战并提交证据', points: 5 }];
+    await command(host, { type: 'game_configure', tasks, reserveTasks, reason: '配置赛事任务和备用池' }); await command(host, { type: 'transition', status: 'RUNNING' });
     const card = (await command(host, { type: 'ability_grant', number: 3, teamId: 'team-1', reason: '现场发放' })).card;
     await command(player, { type: 'ability_use', instanceId: card.id }); await command(host, { type: 'correct_score', teamId: 'team-1', points: 15, reason: '现场确认' });
     assert.equal((await app.inject({ method: 'POST', url: `/api/testing/runs/${game.id}/clock`, headers: { authorization: `Bearer ${testKey}` }, payload: { milliseconds: 7200000 } })).statusCode, 404);
@@ -34,5 +36,8 @@ test('正式比赛独立鉴权、必须配置真实任务；账本在重启后�
     await app.close(); await store.close(); store = await createLocalStore(directory); app = await createTestServer({ store, gameAdminKey, testKey, liveAccounts, enabled: true });
     const response = await app.inject({ url: `/api/games/${game.id}/state`, headers: { authorization: `Bearer ${player}` } }); assert.equal(response.statusCode, 200);
     const view = response.json(); assert.equal(view.team.score, 15); assert.equal(view.abilityCards.length, 1); assert.equal(view.tasks.length, 25); assert.equal(view.accounts, undefined); assert.equal(view.ledger, undefined);
+    assert.equal(view.reserveTasks, undefined);
+    const staffView = (await app.inject({ url: `/api/games/${game.id}/state`, headers: { authorization: `Bearer ${host}` } })).json();
+    assert.deepEqual(staffView.reserveTasks, reserveTasks); assert.equal(staffView.abilityCatalog.length, 24);
   } finally { await app.close(); await store.close(); if (resolve(directory).startsWith(resolve(tmpdir()) + '\\') && directory.includes('hrgos-live-')) await rm(directory, { recursive: true, force: true }); }
 });

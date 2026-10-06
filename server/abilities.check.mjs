@@ -21,12 +21,12 @@ async function fixture(action, teamCount = 2) {
       assert.equal(response.statusCode, 200, response.body);
     };
     await call('host', { type: 'transition', status: 'RUNNING' });
-    await action({ app, run, tokens, call, state, clock });
+    await action({ app, run, tokens, call, state, clock, store });
   } finally { await app.close(); await store.close(); }
 }
 
-test('22 张能力卡目录可见，停用卡不能使用，发放权限仅属于工作人员', async () => fixture(async ({ call, state }) => {
-  const staff = await state(); assert.equal(staff.abilityCatalog.length, 22);
+test('24 张能力卡目录可见，停用卡不能使用，发放权限仅属于工作人员', async () => fixture(async ({ call, state }) => {
+  const staff = await state(); assert.equal(staff.abilityCatalog.length, 24);
   assert.equal(staff.abilityCatalog.find(card => card.number === 19).ready, true);
   await call('player', { type: 'ability_grant', number: 3, teamId: 'team-1', reason: '测试' }, 403);
   const granted = await call('host', { type: 'ability_grant', number: 19, teamId: 'team-1', reason: '测试' });
@@ -175,4 +175,80 @@ test('合照换分对称记账；其余行为限制按明确时限和默认罚�
     await call('host', { type: 'ability_review', useId: use.id, teamId: 'team-2', result: 'reject', reason: '现场确认未遵守' });
     assert.equal((await state('opponent')).team.score, before - penalty);
   }
+}));
+
+test('旧赛局补入23/24卡且保留停用配置，备用任务池仅工作人员可改且不可混入棋盘任务', async () => fixture(async ({ call, state, store, run }) => {
+  await store.update(run.id, state => { state.abilityCatalog = state.abilityCatalog.filter(card => card.number <= 22); state.abilityCatalog[0].enabled = false; return {}; });
+  const migrated = await state(); assert.equal(migrated.abilityCatalog.length, 24); assert.equal(migrated.abilityCatalog[0].enabled, false);
+  const tasks = [{ id: 'EXTRA01', title: '备用任务', brief: '完成另一项现场挑战', points: 5 }];
+  await call('player', { type: 'ability_reserve_configure', tasks, reason: '越权' }, 403);
+  await call('host', { type: 'ability_reserve_configure', tasks: [{ ...tasks[0], id: 'T01' }], reason: '重复棋盘' }, 400);
+  await call('host', { type: 'ability_reserve_configure', tasks: [tasks[0], tasks[0]], reason: '重复编号' }, 400);
+  await call('host', { type: 'ability_reserve_configure', tasks: [{ ...tasks[0], points: 0 }], reason: '无效分值' }, 400);
+  await call('host', { type: 'ability_reserve_configure', tasks, reason: '现场备用池' });
+  assert.deepEqual((await state()).reserveTasks, tasks); assert.equal((await state('player')).reserveTasks, undefined);
+  assert.equal((await state('player')).tasks.length, 25);
+}));
+
+test('无中生有确认后只抽未领取的备用任务，固定快照、证据隔离、审核后解除且不能重复结算', async () => fixture(async ({ call, state, store, run }) => {
+  const grant = async () => (await call('host', { type: 'ability_grant', number: 23, teamId: 'team-1', reason: '现场发放' })).card;
+  const card = await grant();
+  await call('player', { type: 'ability_use', instanceId: card.id, targetTeamId: 'team-2' }, 409);
+  assert.equal((await state('player')).abilityCards[0].status, 'AVAILABLE');
+  const tasks = [{ id: 'EXTRA01', title: '备用挑战一', brief: '现场完成要求一', points: 7 }, { id: 'EXTRA02', title: '备用挑战二', brief: '现场完成要求二', points: 9 }];
+  await call('host', { type: 'ability_reserve_configure', tasks, reason: '配置备用池' });
+  const { use } = await call('player', { type: 'ability_use', instanceId: card.id, targetTeamId: 'team-2', taskId: 'T01' });
+  assert.equal(use.extraTask, undefined);
+  const confirmationKey = crypto.randomUUID();
+  const confirmed = await call('host', { type: 'ability_confirm', useId: use.id, result: 'approve' }, 200, confirmationKey);
+  assert(tasks.some(task => task.id === confirmed.use.extraTask.id));
+  assert.deepEqual((await call('host', { type: 'ability_confirm', useId: use.id, result: 'approve' }, 200, confirmationKey)).use.extraTask, confirmed.use.extraTask);
+  await call('host', { type: 'ability_reserve_configure', tasks: tasks.map(task => ({ ...task, brief: '改过的说明' })), reason: '修改未来任务池' });
+  assert.equal((await state('opponent')).abilityUses[0].extraTask.brief, confirmed.use.extraTask.brief);
+  const second = await grant();
+  await call('player', { type: 'ability_use', instanceId: second.id, targetTeamId: 'team-2' }, 409);
+  await call('opponent', { type: 'ability_ack', useId: use.id });
+  await call('opponent', { type: 'submit', kind: 'arrival', regionId: 'stage-a', media: image }, 409);
+  await call('opponent', { type: 'ability_submit', useId: use.id, text: '只有文字' });
+  await call('host', { type: 'ability_review', useId: use.id, teamId: 'team-2', result: 'approve', reason: '尚无媒体证据' }, 409);
+  await call('opponent', { type: 'ability_submit', useId: use.id, text: '完成额外任务', media: image });
+  assert.equal((await state('player')).abilityUses[0].evidence.length, 0);
+  await call('host', { type: 'ability_review', useId: use.id, teamId: 'team-2', result: 'approve', reason: '现场核实' });
+  assert.equal((await state('opponent')).activeAssignment, null); assert.equal((await state('opponent')).team.score, 0);
+  assert.deepEqual((await state()).awards, {});
+  await call('host', { type: 'ability_review', useId: use.id, teamId: 'team-2', result: 'approve', reason: '重复审核' }, 409);
+  const next = (await call('player', { type: 'ability_use', instanceId: second.id, targetTeamId: 'team-2' })).use;
+  await call('host', { type: 'ability_confirm', useId: next.id, result: 'approve' });
+  const latest = (await state('opponent')).abilityUses.find(item => item.id === next.id);
+  assert.notEqual(latest.extraTask.id, confirmed.use.extraTask.id);
+  await call('host', { type: 'ability_abort', useId: next.id, reason: '现场无法执行' });
+  assert.equal((await state('opponent')).activeAssignment, null);
+  const third = await grant(); await call('player', { type: 'ability_use', instanceId: third.id, targetTeamId: 'team-2' }, 409);
+  assert.equal((await store.read(run.id)).abilityExtraDraws.length, 2);
+}));
+
+test('无中生有到期禁止新增证据，未完成扣5分并解除任务；禁言5分钟暂停冻结、不能提前成功、到期解除', async () => fixture(async ({ call, state, clock }) => {
+  const activate = async number => {
+    const card = (await call('host', { type: 'ability_grant', number, teamId: 'team-1', reason: '现场发放' })).card;
+    const { use } = await call('player', { type: 'ability_use', instanceId: card.id, targetTeamId: 'team-2' });
+    await call('host', { type: 'ability_confirm', useId: use.id, result: 'approve' }); await call('opponent', { type: 'ability_ack', useId: use.id }); return use;
+  };
+  await call('host', { type: 'ability_reserve_configure', tasks: [{ id: 'EXTRA01', title: '备用挑战', brief: '完成现场任务', points: 5 }], reason: '备用池' });
+  const extra = await activate(23); await clock(900000);
+  await call('opponent', { type: 'ability_submit', useId: extra.id, text: '超时补交', media: image }, 409);
+  await call('host', { type: 'ability_review', useId: extra.id, teamId: 'team-2', result: 'reject', reason: '未完成' });
+  assert.equal((await state('opponent')).activeAssignment, null); assert.equal((await state('opponent')).team.score, -5);
+  const silent = await activate(24);
+  assert.equal((await state('opponent')).taskPermissions.phoneTextOnly, true);
+  assert.equal((await state('player')).taskPermissions.phoneTextOnly, false);
+  await call('host', { type: 'ability_review', useId: silent.id, teamId: 'team-2', result: 'approve', reason: '过早' }, 409);
+  await clock(240000); await call('host', { type: 'transition', status: 'PAUSED' }); await clock(600000);
+  assert.equal((await state('opponent')).taskPermissions.phoneTextOnly, true);
+  await call('host', { type: 'transition', status: 'RUNNING' }); await clock(59999);
+  assert.equal((await state('opponent')).taskPermissions.phoneTextOnly, true); await clock(1);
+  assert.equal((await state('opponent')).taskPermissions.phoneTextOnly, false);
+  await call('opponent', { type: 'ability_submit', useId: silent.id, text: '到期后说明' }, 409);
+  await call('host', { type: 'ability_review', useId: silent.id, teamId: 'team-2', result: 'reject', reason: '工作人员确认有成员开口交流' });
+  assert.equal((await state('opponent')).team.score, -10);
+  await call('host', { type: 'ability_review', useId: silent.id, teamId: 'team-2', result: 'reject', reason: '重复' }, 409);
 }));
