@@ -1,10 +1,10 @@
 # 部署到 hrgos.skyseiun.com
 
-此目录部署独立规则测试后端及 PostgreSQL。主玩家/工作人员界面仍为原型；真实 Web Push、生产对象存储及主界面的后端接入尚未完成。完整的测试范围、运行方式和验收边界见 [规则联调说明](../docs/rule-testing.md)。
+本配置部署 HTTPS 前端、正式比赛 API、隔离联调 API 和 PostgreSQL 17。默认前端已接通比赛后端；22 张卡、区域/任务审核、账本和定位由服务端保存。旧版前端原型保留在开发环境。卡牌规则与审核边界见 [能力卡说明](../docs/ability-cards.md)。
 
-## 服务器部署人员操作
+## 首次部署
 
-前提：Linux、Git、OpenSSL、Docker Engine 和 Docker Compose；域名源站指向本服务器，80/443 可用。域名经过 Cloudflare 时，还需确认源站证书及 WebSocket 转发正常。
+服务器需有 Linux、Git、OpenSSL、Docker Engine 和 Docker Compose。域名源站指向服务器，允许 80/443 入站；若已有网站占用端口，将本项目接入现有代理。
 
 ```sh
 git clone https://github.com/bult-0509/HrgOS.git
@@ -13,16 +13,16 @@ umask 077
 cp deploy/.env.example deploy/.env
 ```
 
-使用编辑器修改 `deploy/.env`：
+分别执行三次 `openssl rand -hex 32`，将三份不同的值填写到 `POSTGRES_PASSWORD`、`TEST_API_KEY`、`GAME_ADMIN_KEY`。不要使用占位值，也不要提交 `.env`。
 
 ```dotenv
 API_DOMAIN=hrgos.skyseiun.com
-FRONTEND_ORIGINS=https://hrgos.skyseiun.com,http://127.0.0.1:3001,http://localhost:3001
-POSTGRES_PASSWORD=独立生成的64位十六进制随机字符串
-TEST_API_KEY=另一个独立生成的64位十六进制随机字符串
+FRONTEND_ORIGINS=https://hrgos.skyseiun.com
+POSTGRES_PASSWORD=独立随机64位十六进制值
+TEST_API_KEY=第二份独立随机64位十六进制值
+GAME_ADMIN_KEY=第三份独立随机64位十六进制值
+TEST_API_ENABLED=false
 ```
-
-分别执行两次 `openssl rand -hex 32` 生成两份值，不要使用示例占位值。`FRONTEND_ORIGINS` 必须列出实际测试前端的 origin；本机端口改成 3002 时也要相应修改。配置文件不提交 Git。
 
 ```sh
 chmod 600 deploy/.env
@@ -31,47 +31,42 @@ docker compose --env-file deploy/.env -f deploy/compose.yml up -d --build --wait
 curl --fail https://hrgos.skyseiun.com/api/health
 ```
 
-健康检查应包含 `"database":"postgresql"` 和 `"testApiEnabled":true`。数据库使用持久卷，不开放 5432 公网端口。网关目前转发 API，不提供前端静态站点；测试前端可在开发机运行，或使用下述独立部署方式。若本服务器已有网站占用 80/443，请先将 API 接入现有代理，避免直接启动第二个网关。
+健康检查数据库应为 `postgresql`。Caddy 自动申请 HTTPS 证书，`/api/*` 转发到 API，其他路径提供静态前端及 SPA 回退。数据库不开放公网端口，使用 `postgres-data` 持久卷。Cloudflare 用户需确认源站 HTTPS、WebSocket 和媒体请求正常。
 
-不要执行 `docker compose down -v`，这会删除数据库卷。更新部署时只运行 `git pull --ff-only` 和上述 `up -d --build --wait`；不要覆盖已有密码。日志与状态：
+## 创建正式比赛
+
+1. 打开网站，展开“工作人员创建新比赛”，输入 `GAME_ADMIN_KEY`。管理密钥创建后清空，仅保存在当前页面内存。
+2. 保存比赛编号，向选手提供 `https://hrgos.skyseiun.com/?game=比赛编号`。编号是公开入口，不具备管理权限。
+3. 使用已经分发的工作人员账号登录。账号清单在部署负责人本机 `local-private/`，没有上传公共仓库；后端校验 `src/data/loginAccounts.ts` 的加盐密码摘要。角色和队伍由服务器决定。每队第一位注册成员为队长，只有 `hrg-staff-01` 可看完整定位和轨迹，其余工作人员可审核。
+4. 在“配置正式比赛任务（25 项）”填写真实标题、说明、正整数分值及可选 `boardRewards`。未配置时服务器拒绝开始比赛，正式比赛不沿用测试任务和测试事件分值。
+5. 点击“开始比赛”。可手动发卡，本区五项计分任务完成也会自动发一张随机能力卡。高影响卡先由工作人员确认，目标接收后计时；全队事件所有目标接收后共同开始。
+6. 结束比赛前结算待处理的卡；必要时填写理由终止效果。未结算卡会阻止结束比赛。
+
+正式比赛存于 `hrg_games`，没有测试赛局的两小时过期限制；测试密钥、时钟和清理不能操作正式比赛。会话十二小时有效，重新登录可续会话。重启后旧位置标为离线，收到新 GPS 后恢复；比赛时间仍按服务器时钟推进，维护前请暂停比赛。
+
+## 一键验收
+
+临时设置 `TEST_API_ENABLED=true` 并重新执行 `up -d --build --wait`，访问 `https://hrgos.skyseiun.com/?test=rules`，输入 `TEST_API_KEY`：
+
+- “一键测试 22 张能力卡”：预期 22 项通过、0 项失败、1 项待实机验收。
+- “一键执行规则测试”：预期 31 项通过、0 项失败、4 项待验收。
+- “专项功能验收”：区域自动发卡已实现；自创事件、通用文本收件、最低队伍特殊挑战仍会如实报告未实现。
+- “打开能力卡联调界面”：输入测试密钥建立三队三人的独立赛局，可切换测试身份体验发卡、使用、接收、上传和审核，测试凭据只存在页面内存。
+
+完成验收后恢复 `TEST_API_ENABLED=false`。比赛页面每两秒同步状态，队长前台 GPS 最多每三秒上报，轨迹每分钟采样。手机 GPS、短视频播放、现场动作、异地数据库恢复和公网延迟必须实测；后台持续 GPS、系统 Web Push 尚未实现。
+
+开发机也可执行 `npm ci`、`npm run test:lab`、`npm run test:abilities:local`。远程脚本将 `HRG_TEST_API_URL` 和 `TEST_API_KEY` 写入忽略的 `.env.test.local`，运行 `npm run test:abilities`。密钥和数据库连接不能写进任何 `VITE_` 变量。
+
+## 更新与备份
 
 ```sh
+git pull --ff-only
+docker compose --env-file deploy/.env -f deploy/compose.yml up -d --build --wait
 docker compose --env-file deploy/.env -f deploy/compose.yml ps
 docker compose --env-file deploy/.env -f deploy/compose.yml logs --tail=100 api gateway
 sh deploy/backup.sh
 ```
 
-## 前端一键测试
+保留原 `.env` 和数据库密码；不要执行 `docker compose down -v` 删除持久卷。数据库备份含账号摘要、照片和定位，应妥善保管。图片/短视频原件目前存于受权限保护的数据库字段，单文件 8 MB，大规模活动需增加对象存储及容量监控。
 
-开发机安装 Node.js 24 LTS：
-
-```sh
-npm ci
-```
-
-PowerShell：
-
-```powershell
-$env:HRG_TEST_API_URL = 'https://hrgos.skyseiun.com'
-npm run test:lab
-```
-
-Linux/macOS：
-
-```sh
-HRG_TEST_API_URL=https://hrgos.skyseiun.com npm run test:lab
-```
-
-打开终端打印的 `/?test=rules` URL，输入服务器 `deploy/.env` 中的 `TEST_API_KEY`，点击“一键执行规则测试”。成功结果为 31 项自动通过、0 项失败、4 项待验收，数据库应显示 `postgresql`。密钥仅输入测试页面，不能配置成 `VITE_` 变量。
-
-部署到手机可访问的前端静态站点时：
-
-```sh
-VITE_ENABLE_TEST_LAB=true VITE_TEST_API_BASE_URL=https://hrgos.skyseiun.com npm run build
-```
-
-通过现有 HTTPS 静态站点托管 `dist/`，配置 SPA 回退到 `index.html`，访问 `/?test=rules`。若前后端共用 `hrgos.skyseiun.com`，已有网关须将 `/api/*` 转发到本 Compose 的 `api:4000`，其余路径提供前端静态文件；本仓库默认 Caddy 配置为独立 API 网关，需要按该服务器实际站点结构整合。前端静态目录绝不能包含 `.env`、`local-private/` 或备份文件。
-
-定位、相机需要手机 HTTPS 及用户授权。iPhone/Android 的锁屏通知尚需配置真实 Web Push 后验收。远端异常退出恢复和正式活动开赛条件也不会被一键接口测试标为通过。
-
-本地已验证前端构建、33 项单元测试、4 项后端测试及浏览器一键流程；当前未提供服务器访问，因此尚未验证此 Compose 在异地服务器实际启动。
+Windows 可使用 `deploy/deploy-remote.ps1`，已支持打包前后端、保留旧数据库密码并补充独立比赛管理密钥。本次未提供服务器访问，尚未验证异地 Compose 启动，部署人员应执行以上步骤。

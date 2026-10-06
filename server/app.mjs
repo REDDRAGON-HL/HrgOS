@@ -1,10 +1,12 @@
 import Fastify from 'fastify';
 import cors from '@fastify/cors';
 import websocket from '@fastify/websocket';
+import { randomBytes, createHash } from 'node:crypto';
+import { registerLiveRoutes } from './liveRoutes.mjs';
 import { createAccounts, readSession, secureEqual, signSession, verifyPassword } from './auth.mjs';
 import { advanceClock, allowedScore, executeCommand, exportBackup, restoreBackup, seedState, stateView, visibleMedia, visibleMessages } from './rules.mjs';
 
-export async function createTestServer({ store, testKey, enabled = false, origins = ['http://127.0.0.1:3000', 'http://localhost:3000'] }) {
+export async function createTestServer({ store, testKey, gameAdminKey, liveAccounts, enabled = false, origins = ['http://127.0.0.1:3000', 'http://localhost:3000'] }) {
   if (enabled && (!testKey || testKey.length < 32)) throw new Error('TEST_API_KEY 至少需要 32 个字符');
   const app = Fastify({ logger: false, bodyLimit: 12 * 1024 * 1024 });
   await app.register(cors, { origin: origins, methods: ['GET', 'POST', 'DELETE'], allowedHeaders: ['Authorization', 'Content-Type', 'Idempotency-Key'] });
@@ -13,7 +15,7 @@ export async function createTestServer({ store, testKey, enabled = false, origin
   app.addHook('preClose', async () => { for (const connection of connections) connection.socket.close(); });
   app.addHook('onSend', async (_request, reply) => { reply.header('Cache-Control', 'no-store'); reply.header('X-Content-Type-Options', 'nosniff'); });
   app.setErrorHandler((error, _request, reply) => reply.code(error.statusCode ?? 500).send({ code: error.code ?? 'ERROR', message: error.statusCode ? error.message : '后端处理失败' }));
-  app.get('/api/health', async () => ({ status: 'ok', database: await store.health(), environment: 'isolated-rule-test', testApiEnabled: enabled }));
+  app.get('/api/health', async () => ({ status: 'ok', database: await store.health(), environment: 'hrg-game-api', testApiEnabled: enabled, liveApiEnabled: !!gameAdminKey }));
   const bearer = request => String(request.headers.authorization ?? '').replace(/^Bearer /, '');
   const control = request => {
     if (!enabled) throw Object.assign(new Error('测试接口未启用'), { statusCode: 404 });
@@ -28,9 +30,14 @@ export async function createTestServer({ store, testKey, enabled = false, origin
     return { account, state };
   };
   app.post('/api/testing/runs', async (request, reply) => {
-    control(request); const { accounts, credentials } = createAccounts();
-    const id = await store.create(seedState(accounts));
-    return reply.code(201).send({ id, credentials });
+    control(request); const teamCount = request.body?.teamCount ?? 2;
+    if (!Number.isSafeInteger(teamCount) || teamCount < 2 || teamCount > 5) throw Object.assign(new Error('测试队伍数量应为 2–5'), { statusCode: 400 });
+    const { accounts, credentials } = createAccounts(teamCount); const state = seedState(accounts);
+    const abilityAnswer = `testonly-${randomBytes(20).toString('hex')}`;
+    state.abilityTestHash = createHash('sha256').update(abilityAnswer.replace(/[^a-z0-9]/g, '')).digest('hex');
+    if (teamCount > 2) state.teams = Array.from({ length: teamCount }, (_, i) => ({ id: `team-${i + 1}`, name: `测试${i + 1}队`, regionId: null, regionVersion: 0, finishedAt: null }));
+    const id = await store.create(state);
+    return reply.code(201).send({ id, credentials, abilityAnswer });
   });
   const attempts = new Map();
   app.post('/api/testing/runs/:runId/login', async request => {
@@ -96,5 +103,6 @@ export async function createTestServer({ store, testKey, enabled = false, origin
     }).catch(() => socket.close(1008, 'AUTH_REQUIRED'));
   });
   app.delete('/api/testing/runs/:runId', async request => { control(request); await store.remove(request.params.runId); return { removed: true }; });
+  await registerLiveRoutes(app, store, gameAdminKey, liveAccounts);
   return app;
 }

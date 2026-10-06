@@ -34,7 +34,7 @@ pwsh -File deploy/deploy-remote.ps1 `
 
 脚本先检查 SSH 和 Compose，再打包、上传并启动独立 Compose 项目 `hrgos-rule-tests`。配置和随机生成的数据库密码、测试密钥保存在被 Git 忽略的 `local-private/remote-rule-tests.env`；页面使用密钥文件 `local-private/remote-rule-tests-key.txt`。重复执行保留凭据和数据库卷，并更新允许的前端来源。脚本不安装服务器软件，不修改 DNS，也不删除已有数据库卷。
 
-服务器使用 PostgreSQL 17、Node API、Caddy HTTPS 网关。数据库没有公网端口，只有 API 网关开放 80/443。本部署包提供后端接口；前端页面在本机启动或由独立前端部署提供。若服务器已运行占用 80/443 的网站，需要将 `/api/*` 接入已有反向代理后再启动，避免端口冲突。Cloudflare 代理及源站 HTTPS 配置需要保证证书申请、HTTPS 和 WebSocket 可用。
+服务器使用 PostgreSQL 17、Node API、Caddy HTTPS 网关。数据库没有公网端口，只有 API 网关开放 80/443。本部署包现同时提供前端、正式比赛 API 和独立测试接口，部署步骤见 deploy/README.md。若服务器已运行占用 80/443 的网站，需要将 `/api/*` 接入已有反向代理后再启动，避免端口冲突。Cloudflare 代理及源站 HTTPS 配置需要保证证书申请、HTTPS 和 WebSocket 可用。
 
 部署后连接异地后端：
 
@@ -69,7 +69,7 @@ npm run test:lab
 - TC-06：异地服务器异常退出后恢复持久化状态。本机子进程强制退出与重启测试已经实现，远端进程和卷仍需部署后实测。
 - TC-10：正式活动开赛条件，包括生产 API、推送、完整素材与真实设备验收。
 
-测试后端是独立规则沙箱。主玩家端、工作人员端目前仍使用前端原型，没有自动切换为多人生产系统。测试媒体保存在测试赛局 JSONB 中，用于验证原图和授权行为；生产对象存储、正式账号后端迁移和主页面接入仍需实现。
+测试后端是独立规则沙箱。新增 ?live=cards 比赛界面已经接通正式账号后端校验、卡牌、任务审核和定位，正式赛局保存在独立 hrg_games 表；旧 DemoApp 仍为原型。正式和测试媒体暂存于受权限控制的数据库字段，生产对象存储仍待增加。22 张能力卡测试见 docs/ability-cards.md；部署前后端按 deploy/README.md 配置 GAME_ADMIN_KEY，联调时临时启用 TEST_API_ENABLED。
 
 事件创作、文本收件、最低队伍特殊挑战及区域奖励卡另有“专项功能验收”按钮，缺失功能会标为失败。当前结果及动效修复见 [功能专项验收](feature-readiness.md)；命令行为 `npm run test:readiness:local`，异地为 `npm run test:readiness`。
 

@@ -21,7 +21,8 @@ services:
     environment:
       DATABASE_URL: postgresql://hrg:${POSTGRES_PASSWORD}@db:5432/hrg_tests
       TEST_API_KEY: ${TEST_API_KEY:?请配置测试访问密钥}
-      TEST_API_ENABLED: "true"
+      TEST_API_ENABLED: ${TEST_API_ENABLED:-false}
+      GAME_ADMIN_KEY: ${GAME_ADMIN_KEY:?请配置独立比赛管理密钥}
       FRONTEND_ORIGINS: ${FRONTEND_ORIGINS:?请配置允许的前端来源}
     depends_on:
       db:
@@ -33,7 +34,9 @@ services:
       retries: 10
     restart: unless-stopped
   gateway:
-    image: caddy:2-alpine
+    build:
+      context: ..
+      dockerfile: deploy/frontend.Dockerfile
     environment:
       API_DOMAIN: ${API_DOMAIN:?请配置后端域名}
     ports:
@@ -41,7 +44,6 @@ services:
       - "443:443"
       - "443:443/udp"
     volumes:
-      - ./Caddyfile:/etc/caddy/Caddyfile:ro
       - caddy-data:/data
       - caddy-config:/config
     depends_on:

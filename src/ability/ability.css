@@ -1,0 +1,41 @@
+.ability-app { --card-lime:#c8ff32; max-width:1240px; margin:auto; padding:36px 24px 80px; color:#f2f5e9; }
+.ability-app h1 { font-size:clamp(28px,4vw,44px); letter-spacing:-1.5px; margin:8px 0; }
+.ability-app h2 { margin:32px 0 16px; font-size:22px; }
+.ability-header { display:flex; justify-content:space-between; align-items:center; gap:20px; border-bottom:2px solid #45503c; padding-bottom:20px; }
+.ability-app a { color:var(--card-lime); }
+.ability-header a { display:inline-block; margin-left:12px; }
+.ability-app button { border:1px solid #8eae31; padding:10px 16px; background:var(--card-lime); color:#11170c; border-radius:8px; cursor:pointer; font:inherit; font-weight:700; }
+.ability-app button:disabled { opacity:.4; cursor:default; }
+.ability-app label { display:grid; gap:6px; margin:12px 0; font-size:14px; }
+.ability-app input:not([type=checkbox]), .ability-app select, .ability-app textarea { border:1px solid #566047; border-radius:8px; padding:10px 12px; background:#0e130d; width:100%; color:inherit; font:inherit; }
+.ability-app textarea { min-height:88px; resize:vertical; }
+.ability-app input[type=checkbox] { width:18px; height:18px; }
+.ability-actions { display:flex; gap:12px; align-items:end; flex-wrap:wrap; margin:12px 0; }
+.ability-actions label { flex:1; min-width:160px; }
+.ability-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:16px; }
+.ability-card, .ability-use, .ability-surface { border:1px solid #46513c; background:#151b12; border-radius:16px; padding:20px; margin:16px 0; box-shadow:0 3px 0 #080d07; }
+.ability-card { margin:0; background:linear-gradient(145deg,#151b12 60%,#23300e); }
+.ability-card h3 { font-size:22px; margin:12px 0; }
+.ability-card p { min-height:68px; line-height:1.7; }
+.ability-number { display:inline-flex; width:44px; height:44px; background:#18201c; color:var(--card-lime); font-size:22px; font-weight:900; align-items:center; justify-content:center; border-radius:10px; }
+.ability-use__heading { display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
+.ability-use__heading h3, .ability-use__heading p { margin:3px 0; }
+.ability-use__heading > span:last-child { margin-left:auto; font-size:13px; }
+.ability-use--active { border:2px solid #719f00; }
+.ability-use--pending { border-color:#bcb157; }
+.ability-use--done, .ability-use--cancelled { background:#121810; }
+.ability-status { min-height:44px; padding:10px 0; }
+.ability-status [role=alert], .ability-alert { color:#ffac89; }
+.ability-proof { display:block; width:auto; max-width:100%; max-height:320px; border-radius:10px; margin:12px 0; }
+.ability-evidence { border-left:3px solid #c8ff32; padding:10px 16px; margin:14px 0; background:#1c2615; overflow-wrap:anywhere; }
+.ability-review { border-top:1px solid #d5dccd; margin-top:18px; }
+.ability-results { font-weight:700; }
+.ability-app fieldset { border:1px solid #d5dccd; border-radius:8px; }
+.ability-app table { width:100%; border-collapse:collapse; text-align:left; }
+.ability-app th,.ability-app td { padding:10px; border-bottom:1px solid #d5dccd; }
+.ability-app summary { cursor:pointer; padding:12px 0; font-weight:700; }
+.ability-app .ability-config-json { min-height:340px; font-family:monospace; }
+.ability-lobby { max-width:640px; padding-top:10vh; }
+.ability-login-error { position:fixed; bottom:20px; left:20px; background:#fff; padding:18px; color:#a23522; border:1px solid #a23522; }
+@media(max-width:760px) { .ability-app { padding:20px 14px 60px; } .ability-grid { grid-template-columns:1fr; } .ability-header { align-items:start; } .ability-header > div:last-child { display:grid; gap:12px; } .ability-header a { margin:0; } .ability-actions { align-items:stretch; } .ability-actions button { width:100%; } }
+@media(prefers-reduced-motion:reduce) { .ability-app * { animation:none!important; transition:none!important; } }

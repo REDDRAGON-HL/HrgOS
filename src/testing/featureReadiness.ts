@@ -86,14 +86,14 @@ export async function runFeatureReadiness(options: SuiteOptions): Promise<SuiteR
     });
 
     await step('F-REGION-CARD', '区域任务完成后自动且只发放一次能力卡', async () => {
-      const before = (await state('player')).cards;
+      const before = (await state('player')).abilityCards;
       for (const taskId of ['T01', 'T02', 'T03', 'T04', 'T05']) {
         const submitted = await command('player', { type: 'submit', kind: 'task', regionId: 'stage-a', taskId, media: fixtureImage }); await review(submitted.submission.id);
       }
       const view = await state('player');
-      const earned = view.cards.filter((card: { id: string; regionId: string }) => !before.some((previous: { id: string }) => previous.id === card.id) && card.regionId === 'stage-a');
+      const earned = view.abilityCards.filter((card: { id: string; regionId: string }) => !before.some((previous: { id: string }) => previous.id === card.id) && card.regionId === 'stage-a');
       assert(earned.length === 1, `完成本区五项任务后新增区域能力卡 ${earned.length} 张，要求 1 张；现有三张卡是初始化测试库存，不是完成奖励。`);
-      const repeated = await state('player'); assert(repeated.cards.filter((card: { id: string }) => card.id === earned[0].id).length === 1, '重复读取造成重复发卡');
+      const repeated = await state('player'); assert(repeated.abilityCards.filter((card: { id: string }) => card.id === earned[0].id).length === 1, '重复读取造成重复发卡');
       return '本区五项任务完成后自动发放一张能力卡，重复读取不重复发卡；五项为现有沙箱上限，正式完成条件仍须配置。';
     });
 

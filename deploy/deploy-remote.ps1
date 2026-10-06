@@ -29,10 +29,16 @@ if (Test-Path -LiteralPath $configFile) {
   @("API_DOMAIN=$ApiDomain", "FRONTEND_ORIGINS=$FrontendOrigins", "POSTGRES_PASSWORD=$databasePassword", "TEST_API_KEY=$testKey") | Set-Content -LiteralPath $configFile -Encoding utf8
 }
 $testKey | Set-Content -LiteralPath $keyFile -Encoding utf8
+$currentConfig = Get-Content -LiteralPath $configFile
+if (!($currentConfig | Where-Object { $_ -like 'GAME_ADMIN_KEY=*' })) {
+  $gameKey = [Convert]::ToHexString([System.Security.Cryptography.RandomNumberGenerator]::GetBytes(32)).ToLowerInvariant()
+  "GAME_ADMIN_KEY=$gameKey" | Add-Content -LiteralPath $configFile -Encoding utf8
+}
+if (!($currentConfig | Where-Object { $_ -like 'TEST_API_ENABLED=*' })) { 'TEST_API_ENABLED=false' | Add-Content -LiteralPath $configFile -Encoding utf8 }
 & ssh -o BatchMode=yes $SshHost 'docker compose version'
 if ($LASTEXITCODE -ne 0) { throw 'SSH 登录或 Docker Compose 检查失败。请先配置 SSH 和服务器 Docker；脚本不会跳过主机指纹验证。' }
 $archive = Join-Path $artifactFolder 'hrgos-test-backend.tar.gz'
-& tar -czf $archive --exclude=deploy/.env -C $projectRoot server deploy package.json package-lock.json
+& tar -czf $archive --exclude=deploy/.env -C $projectRoot server deploy src public package.json package-lock.json index.html tsconfig.json tsconfig.app.json tsconfig.node.json vite.config.ts
 if ($LASTEXITCODE -ne 0) { throw '后端打包失败。' }
 & ssh -o BatchMode=yes $SshHost 'mkdir -p "$HOME/hrgos-test-backend/deploy"'
 if ($LASTEXITCODE -ne 0) { throw '服务器目录创建失败。' }

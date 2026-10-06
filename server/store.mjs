@@ -9,11 +9,12 @@ const awardMigration = `CREATE TABLE IF NOT EXISTS hrg_test_awards (
   task_id text NOT NULL, team_id text NOT NULL, PRIMARY KEY(run_id,task_id)
 )`;
 
-async function saveAwards(connection, id, awards, previous = {}) {
+async function saveAwards(connection, id, awards, previous = {}, live = false) {
+  const table = live ? 'hrg_game_awards' : 'hrg_test_awards';
   for (const [taskId, award] of Object.entries(awards ?? {})) {
     if (previous[taskId]?.teamId === award.teamId) continue;
-    await connection.query('INSERT INTO hrg_test_awards(run_id,task_id,team_id) VALUES ($1,$2,$3) ON CONFLICT DO NOTHING', [id, taskId, award.teamId]);
-    const result = await connection.query('SELECT team_id FROM hrg_test_awards WHERE run_id=$1 AND task_id=$2', [id, taskId]);
+    await connection.query(`INSERT INTO ${table}(run_id,task_id,team_id) VALUES ($1,$2,$3) ON CONFLICT DO NOTHING`, [id, taskId, award.teamId]);
+    const result = await connection.query(`SELECT team_id FROM ${table} WHERE run_id=$1 AND task_id=$2`, [id, taskId]);
     if (result.rows[0].team_id !== award.teamId) throw Object.assign(new Error('数据库任务归属唯一约束冲突'), { statusCode: 409 });
   }
 }
@@ -25,39 +26,45 @@ function storeAdapter(connect, close, driver) {
       const connection = await connect();
       try {
         await connection.query(migration); await connection.query(awardMigration);
+        await connection.query('CREATE TABLE IF NOT EXISTS hrg_games(id text PRIMARY KEY,state jsonb NOT NULL,version integer NOT NULL DEFAULT 0)');
+        await connection.query(awardMigration.replaceAll('hrg_test_awards', 'hrg_game_awards').replaceAll('hrg_test_runs', 'hrg_games'));
         // 重启后持久化位置保留，但不能将旧位置误标成在线。
         await connection.query(`UPDATE hrg_test_runs SET state=jsonb_set(state,'{locations}',COALESCE((SELECT jsonb_object_agg(key,value || '{"restored":true}'::jsonb) FROM jsonb_each(state->'locations')),'{}'::jsonb))`);
+        await connection.query(`UPDATE hrg_games SET state=jsonb_set(state,'{locations}',COALESCE((SELECT jsonb_object_agg(key,value || '{"restored":true}'::jsonb) FROM jsonb_each(state->'locations')),'{}'::jsonb))`);
       } finally { connection.release(); }
     },
     async health() { const connection = await connect(); try { await connection.query('SELECT 1'); return driver; } finally { connection.release(); } },
-    async create(state) {
+    async create(state, live = false) {
+      const table = live ? 'hrg_games' : 'hrg_test_runs';
       const connection = await connect();
       try {
         await connection.query('DELETE FROM hrg_test_runs WHERE expires_at < CURRENT_TIMESTAMP');
         const id = randomUUID();
         await connection.query('BEGIN');
-        await connection.query('INSERT INTO hrg_test_runs(id,state) VALUES ($1,$2::jsonb)', [id, JSON.stringify(state)]);
-        await saveAwards(connection, id, state.awards);
+        await connection.query(`INSERT INTO ${table}(id,state) VALUES ($1,$2::jsonb)`, [id, JSON.stringify(state)]);
+        await saveAwards(connection, id, state.awards, {}, live);
         await connection.query('COMMIT');
         return id;
       } catch (error) { await connection.query('ROLLBACK'); throw error; } finally { connection.release(); }
     },
-    async read(id) {
+    async read(id, live = false) {
+      const table = live ? 'hrg_games' : 'hrg_test_runs';
       const connection = await connect();
-      try { const result = await connection.query('SELECT state FROM hrg_test_runs WHERE id=$1 AND expires_at>CURRENT_TIMESTAMP', [id]); return result.rows[0]?.state ?? null; }
+      try { const result = await connection.query(`SELECT state FROM ${table} WHERE id=$1${live ? '' : ' AND expires_at>CURRENT_TIMESTAMP'}`, [id]); return result.rows[0]?.state ?? null; }
       finally { connection.release(); }
     },
-    async update(id, apply) {
+    async update(id, apply, live = false) {
+      const table = live ? 'hrg_games' : 'hrg_test_runs';
       const connection = await connect();
       try {
         await connection.query('BEGIN');
-        const result = await connection.query('SELECT state FROM hrg_test_runs WHERE id=$1 AND expires_at>CURRENT_TIMESTAMP FOR UPDATE', [id]);
+        const result = await connection.query(`SELECT state FROM ${table} WHERE id=$1${live ? '' : ' AND expires_at>CURRENT_TIMESTAMP'} FOR UPDATE`, [id]);
         if (!result.rows.length) { const error = new Error('测试赛局不存在或已过期'); error.statusCode = 404; throw error; }
         const state = result.rows[0].state;
         const previousAwards = structuredClone(state.awards ?? {});
         const response = await apply(state);
-        await saveAwards(connection, id, state.awards, previousAwards);
-        await connection.query('UPDATE hrg_test_runs SET state=$2::jsonb,version=version+1 WHERE id=$1', [id, JSON.stringify(state)]);
+        await saveAwards(connection, id, state.awards, previousAwards, live);
+        await connection.query(`UPDATE ${table} SET state=$2::jsonb,version=version+1 WHERE id=$1`, [id, JSON.stringify(state)]);
         await connection.query('COMMIT');
         return response;
       } catch (error) { await connection.query('ROLLBACK'); throw error; }

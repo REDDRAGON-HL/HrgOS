@@ -6,7 +6,6 @@ node_modules
 local-private
 artifacts
 dist
-public
 previews
 outputs
 .pnpm-store
@@ -14,3 +13,5 @@ outputs
 *.png
 *.mp4
 *.xlsx
+!public
+!public/**

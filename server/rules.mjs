@@ -1,5 +1,6 @@
 import { createHash, randomUUID } from 'node:crypto';
 import sharp from 'sharp';
+import { abilityCommand, abilityView, abilityTick, abilityScoreAccess, abilityLocation, abilityResultView, taskPermissions, abilityTaskReviewed } from './abilityCards.mjs';
 
 export class RuleError extends Error {
   constructor(code, message = code, statusCode = 409) { super(message); this.code = code; this.statusCode = statusCode; }
@@ -32,8 +33,10 @@ function credit(state, teamId, points, category, reference, actor, reason) {
 }
 const score = (state, teamId) => state.ledger.filter(entry => entry.teamId === teamId).reduce((sum, entry) => sum + entry.points, 0);
 function ranking(state) {
-  return state.teams.map(team => ({ teamId: team.id, name: team.name, score: score(state, team.id), taskScore: state.ledger.filter(entry => entry.teamId === team.id && entry.category === 'TASK').reduce((sum, entry) => sum + entry.points, 0), finishedAt: team.finishedAt }))
-    .sort((a, b) => b.score - a.score || b.taskScore - a.taskScore || (a.finishedAt ?? Infinity) - (b.finishedAt ?? Infinity)).map((entry, index, entries) => ({ ...entry, rank: index && entries[index - 1].score === entry.score && entries[index - 1].taskScore === entry.taskScore && entries[index - 1].finishedAt === entry.finishedAt ? entries[index - 1].rank ?? index : index + 1 }));
+  const entries = state.teams.map(team => ({ teamId: team.id, name: team.name, score: score(state, team.id), taskScore: state.ledger.filter(entry => entry.teamId === team.id && entry.category === 'TASK').reduce((sum, entry) => sum + entry.points, 0), finishedAt: team.finishedAt }))
+    .sort((a, b) => b.score - a.score || b.taskScore - a.taskScore || (a.finishedAt ?? Infinity) - (b.finishedAt ?? Infinity));
+  let rank = 0;
+  return entries.map((entry, index) => { const previous = entries[index - 1]; if (!previous || previous.score !== entry.score || previous.taskScore !== entry.taskScore || previous.finishedAt !== entry.finishedAt) rank = index + 1; return { ...entry, rank }; });
 }
 function message(state, teamId, type, text, pushEligible = false, reference = null) {
   state.messages.push({ id: ++state.sequence, teamId, type, text, pushEligible, pushStatus: pushEligible ? 'unconfigured' : 'not-required', at: state.now, reference, readBy: [], playedBy: [] });
@@ -44,6 +47,7 @@ function locationView(state, team) {
 }
 export function tick(state) {
   state.now = state.virtualTime ?? Date.now();
+  abilityTick(state);
   const period = Math.floor(elapsed(state) / state.config.rankingIntervalMs);
   if (period > 0 && !state.snapshots.some(snapshot => snapshot.period === period)) state.snapshots.push({ period, at: state.now, elapsed: period * state.config.rankingIntervalMs, ranking: ranking(state) });
 }
@@ -52,7 +56,7 @@ export function stateView(state, actor) {
   tick(state);
   const lastSnapshot = state.snapshots.at(-1);
   const snapshot = lastSnapshot && elapsed(state) - lastSnapshot.elapsed < state.config.rankingVisibleMs ? lastSnapshot : null;
-  const common = { status: state.status, elapsedMs: elapsed(state), serverTime: state.now, configVersion: state.config.version, rankingSnapshot: snapshot, lastEventId: state.sequence };
+  const common = { ...abilityView(state, actor), taskPermissions: taskPermissions(state, actor.teamId), liveRanking: actor.manage || abilityScoreAccess(state, actor.teamId) ? ranking(state) : null, status: state.status, elapsedMs: elapsed(state), serverTime: state.now, configVersion: state.config.version, rankingSnapshot: snapshot, lastEventId: state.sequence };
   if (actor.role === 'staff') {
     if (!actor.manage && !actor.review) return { ...common, locations: actor.locations ? state.teams.map(team => locationView(state, team)) : [] };
     const metadata = JSON.stringify({ ...state, media: Object.fromEntries(Object.entries(state.media).map(([id, media]) => [id, { ...media, base64: undefined, thumbnail: undefined }])) });
@@ -68,7 +72,7 @@ export function visibleMessages(state, actor, after = 0) {
 }
 export function allowedScore(state, actor, target) {
   tick(state);
-  requireRule(actor.manage || target === actor.teamId || state.effects.some(effect => effect.effect === 'score_access' && effect.viewerTeamId === actor.teamId && effect.teamId === target && activeEffect(state, effect)), 'FORBIDDEN', 403);
+  requireRule(actor.manage || target === actor.teamId || abilityScoreAccess(state, actor.teamId) || state.effects.some(effect => effect.effect === 'score_access' && effect.viewerTeamId === actor.teamId && effect.teamId === target && activeEffect(state, effect)), 'FORBIDDEN', 403);
   requireRule(state.teams.some(team => team.id === target), 'TEAM_NOT_FOUND', 404);
   return { teamId: target, score: score(state, target) };
 }
@@ -78,11 +82,15 @@ export function visibleMedia(state, actor, id) {
   return media;
 }
 
-async function prepareMedia(state, input, teamId) {
+async function prepareMedia(state, input, teamId, video = false) {
   requireRule(input && typeof input.base64 === 'string' && input.base64.length < Math.ceil(state.config.mediaLimitBytes * 4 / 3) + 8 && typeof input.name === 'string' && !/[\\/\x00]/.test(input.name), 'MEDIA_INVALID', 400);
-  requireRule(['image/png', 'image/jpeg', 'image/webp'].includes(input.mime) && /^[a-zA-Z0-9+/]*={0,2}$/.test(input.base64), 'MEDIA_INVALID', 400);
+  requireRule(['image/png', 'image/jpeg', 'image/webp', ...(video ? ['video/mp4', 'video/webm'] : [])].includes(input.mime) && /^[a-zA-Z0-9+/]*={0,2}$/.test(input.base64), 'MEDIA_INVALID', 400);
   const bytes = Buffer.from(input.base64, 'base64');
   requireRule(bytes.length > 0 && bytes.length <= state.config.mediaLimitBytes, 'MEDIA_INVALID', 400);
+  if (input.mime.startsWith('video/')) {
+    requireRule(bytes.length > 32 && (input.mime === 'video/mp4' ? bytes.subarray(4, 8).toString('ascii') === 'ftyp' : bytes.subarray(0, 4).toString('hex') === '1a45dfa3'), 'MEDIA_INVALID', 400);
+    return { id: randomUUID(), teamId, mime: input.mime, name: input.name, bytes: bytes.length, sha256: hash(bytes), base64: input.base64 };
+  }
   let metadata, thumbnail;
   try { metadata = await sharp(bytes, { limitInputPixels: 40000000 }).metadata(); thumbnail = await sharp(bytes, { limitInputPixels: 40000000 }).resize({ width: 480, height: 480, fit: 'inside', withoutEnlargement: true }).webp().toBuffer(); }
   catch { throw new RuleError('MEDIA_INVALID', '影像文件损坏', 400); }
@@ -105,18 +113,33 @@ export async function executeCommand(state, actor, command, key) {
   if (state.idempotency[keyId]) { requireRule(state.idempotency[keyId].fingerprint === fingerprint, 'IDEMPOTENCY_CONFLICT'); return state.idempotency[keyId].result; }
   const before = { status: state.status, configVersion: state.config.version, ledgerCount: state.ledger.length, submissionCount: state.submissions.length };
   let result;
-  if (command.type === 'transition') {
+  if (command.type === 'game_configure') {
+    manage(actor); requireRule(state.mode === 'live' && state.status === 'READY' && command.reason?.trim(), 'CONFIG_INVALID', 400);
+    const tasks = command.tasks;
+    requireRule(Array.isArray(tasks) && tasks.length === 25 && new Set(tasks.map(task => task.id)).size === 25 && tasks.every(task => typeof task.id === 'string' && /^[A-Za-z0-9_-]{1,40}$/.test(task.id) && typeof task.title === 'string' && task.title.trim() && task.title.length <= 100 && typeof task.brief === 'string' && task.brief.trim() && task.brief.length <= 2000 && Number.isSafeInteger(task.points) && task.points > 0 && task.points <= 10000), 'TASK_CONFIG_INVALID', 400);
+    const rewards = command.boardRewards ?? [];
+    requireRule(Array.isArray(rewards) && rewards.every(reward => Array.isArray(reward.tasks) && reward.tasks.length && reward.tasks.every(id => tasks.some(task => task.id === id)) && Number.isSafeInteger(reward.points) && reward.points >= 0 && reward.points <= 10000), 'REWARD_CONFIG_INVALID', 400);
+    state.configHistory.push(structuredClone(state.config)); state.config.tasks = tasks.map(({ id, title, brief, points }) => ({ id, title, brief, points, image: '/hrg-mark.svg' })); state.config.boardRewards = rewards; state.config.version++; state.configured = true;
+    result = { configured: true, version: state.config.version };
+  } else if (command.type.startsWith('ability_')) {
+    result = abilityResultView(await abilityCommand(state, actor, command, { requireRule, manage, requireRunning, elapsed, score, credit, message, ranking, prepareMedia: (state, input, teamId) => prepareMedia(state, input, teamId, true) }), actor);
+  } else if (command.type === 'transition') {
     manage(actor);
     const transitions = { READY: ['RUNNING'], RUNNING: ['PAUSED', 'FINISHED'], PAUSED: ['RUNNING', 'FINISHED'], FINISHED: [] };
     requireRule(transitions[state.status]?.includes(command.status), 'INVALID_TRANSITION');
+    if (state.mode === 'live' && command.status === 'RUNNING') requireRule(state.configured, 'GAME_CONFIG_REQUIRED');
+    if (command.status === 'FINISHED') requireRule(!state.abilityUses.some(use => ['PENDING', 'AWAITING_ACK', 'AWAITING_REVIEW'].includes(use.status) || use.status === 'ACTIVE' && ![3, 8].includes(use.number)), 'ABILITY_FINISH_BLOCKED');
     if (command.status === 'FINISHED') requireRule(!state.submissions.some(item => item.status === 'QUEUED') && !state.cardRequests.some(item => item.status === 'PENDING'), 'FINISH_BLOCKED');
     if (state.status === 'RUNNING') state.elapsedMs = elapsed(state);
     state.status = command.status; state.runningSince = command.status === 'RUNNING' ? state.now : null;
+    if (command.status === 'FINISHED') for (const use of state.abilityUses.filter(use => use.status === 'ACTIVE')) use.status = 'DONE';
     message(state, 'all', 'game', command.status, true);
     result = { status: state.status };
   } else if (command.type === 'submit') {
     requireRule(actor.role === 'player', 'FORBIDDEN', 403); requireRunning(state);
     const team = teamFor(state, actor); requireRule(!team.finishedAt, 'TEAM_FINISHED');
+    if (command.kind === 'task') { requireRule(!taskPermissions(state, team.id).blockedBy.length, 'TASK_RESTRICTED'); requireRule(!state.activeAssignments[team.id] || state.activeAssignments[team.id].taskId === command.taskId, 'ASSIGNED_TASK_REQUIRED'); }
+    else requireRule(!state.activeAssignments[team.id], 'ASSIGNED_TASK_REQUIRED');
     const regionIndex = state.config.regions.indexOf(command.regionId); requireRule(regionIndex >= 0, 'REGION_INVALID', 400);
     if (command.kind === 'arrival') requireRule(regionIndex === (team.regionId ? state.config.regions.indexOf(team.regionId) + 1 : 0), 'REGION_ORDER_INVALID');
     else { requireRule(command.kind === 'task' && team.regionId === command.regionId, 'REGION_NOT_UNLOCKED'); requireRule(state.config.tasks.some(task => task.id === command.taskId), 'TASK_INVALID', 400); requireRule(!state.effects.some(effect => effect.teamId === team.id && effect.effect === 'restriction' && activeEffect(state, effect)), 'TASK_RESTRICTED'); }
@@ -149,6 +172,7 @@ export async function executeCommand(state, actor, command, key) {
       } else item.status = 'APPROVED_NON_SCORING';
     }
     item.reviewedAt = state.now; item.operatorId = actor.id; item.reason = command.reason ?? '';
+    abilityTaskReviewed(state, item, { message });
     message(state, team.id, 'review', item.status, true, item.id); result = { submission: item };
   } else if (command.type === 'use_card') {
     requireRule(actor.role === 'player', 'FORBIDDEN', 403); requireRunning(state); requireRule(!teamFor(state, actor).finishedAt, 'TEAM_FINISHED');
@@ -186,6 +210,7 @@ export async function executeCommand(state, actor, command, key) {
     const previous = state.locations[team.id]; requireRule(!previous || state.now - previous.receivedAt >= state.config.locationIntervalMs, 'LOCATION_THROTTLED', 429);
     const position = { latitude, longitude, accuracy, capturedAt, receivedAt: state.now, leaderId: actor.id, restored: false };
     state.locations[team.id] = position;
+    abilityLocation(state, team.id, position, { message });
     const lastSample = state.locationHistory.findLast(item => item.teamId === team.id);
     if (!lastSample || state.now - lastSample.receivedAt >= state.config.sampleMs) state.locationHistory.push({ ...position, teamId: team.id });
     result = { position, sampled: !lastSample || state.now - lastSample.receivedAt >= state.config.sampleMs };
@@ -199,6 +224,7 @@ export async function executeCommand(state, actor, command, key) {
     if (command.played && !original.playedBy.includes(deviceId)) original.playedBy.push(deviceId); result = { read: true, played: original.playedBy.includes(deviceId) };
   } else if (command.type === 'finish_team') {
     manage(actor); requireRunning(state);
+    requireRule(!state.abilityUses.some(use => (use.targets.includes(command.teamId) || use.casterTeamId === command.teamId) && (['PENDING', 'AWAITING_ACK', 'AWAITING_REVIEW'].includes(use.status) || use.status === 'ACTIVE' && ![3, 8].includes(use.number))), 'ABILITY_FINISH_BLOCKED');
     const team = state.teams.find(item => item.id === command.teamId); requireRule(team, 'TEAM_NOT_FOUND', 404); requireRule(!team.finishedAt, 'TEAM_FINISHED');
     team.finishedAt = state.now; credit(state, team.id, state.config.finishPoints, 'FINISH', team.id, actor, '工作人员现场确认'); result = { team, allFinished: state.teams.every(item => item.finishedAt) };
   } else if (command.type === 'correct_score') {
