@@ -1,0 +1,24 @@
+.rule-lab { width: min(1120px, 100%); margin: 0 auto; padding: 40px 24px; }
+.rule-lab__header { display: flex; justify-content: space-between; gap: 24px; margin-bottom: 28px; }
+.rule-lab__header h1 { margin-bottom: 12px; font-size: clamp(28px, 5vw, 44px); }
+.rule-lab__header p { max-width: 800px; color: var(--ink-soft); }
+.rule-lab a { color: var(--lime); white-space: nowrap; }
+.rule-lab__config { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; padding: 24px; border: 1px solid var(--line); background: var(--surface); }
+.rule-lab__config label { display: grid; gap: 10px; font-weight: 650; }
+.rule-lab__config input:not([type=checkbox]) { width: 100%; min-height: 46px; padding: 12px; border: 1px solid var(--line-bright); background: var(--surface-2); border-radius: 4px; }
+.rule-lab__config .rule-lab__device { grid-column: 1 / -1; display: flex; align-items: flex-start; font-weight: 400; font-size: 14px; }
+.rule-lab__device input { margin: 4px 0; accent-color: var(--lime); }
+.rule-lab__actions { display: flex; flex-wrap: wrap; gap: 12px; grid-column: 1 / -1; }
+.rule-lab__config > p { grid-column: 1 / -1; margin: 0; color: var(--ink-soft); font-size: 13px; }
+.rule-lab__summary { display: flex; flex-wrap: wrap; gap: 18px; align-items: center; min-height: 84px; padding: 20px 0; }
+.rule-lab__summary p { width: 100%; margin: 0; color: var(--danger); }
+.rule-lab__results { display: grid; gap: 10px; list-style: none; margin: 0; padding: 0; }
+.rule-result { display: grid; grid-template-columns: 1fr auto; gap: 10px; padding: 18px 20px; border: 1px solid var(--line); background: var(--surface); }
+.rule-result > div { display: flex; flex-wrap: wrap; gap: 12px; }
+.rule-result span, .rule-result small { color: var(--ink-soft); font-size: 12px; }
+.rule-result p { margin: 0; color: var(--ink-soft); font-size: 13px; }
+.rule-result b { color: var(--lime); font-size: 13px; }
+.rule-result--failed b { color: var(--danger); }
+.rule-result--manual b { color: var(--orange); }
+.rule-lab__board { margin-top: 28px; }
+@media(max-width: 640px) { .rule-lab { padding: 24px 16px; } .rule-lab__header { flex-direction: column; gap: 8px; } .rule-lab__config { grid-template-columns: 1fr; padding: 18px; } .rule-result { padding: 16px; } .rule-result p { grid-column: 1 / -1; } }

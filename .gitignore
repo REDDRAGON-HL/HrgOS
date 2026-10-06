@@ -9,4 +9,5 @@ artifacts/
 !.env.example
 *.log
 coverage
+local-private/
 .DS_Store

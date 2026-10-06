@@ -6,7 +6,6 @@ import {
   ChevronRight,
   CircleUserRound,
   Clock3,
-  Crosshair,
   Flag,
   ImagePlus,
   LocateFixed,
@@ -21,11 +20,16 @@ import {
   Wifi,
   Zap
 } from "lucide-react";
-import type { GameCard, GameMessage, Task } from "../types";
+import type { GameCard, GameMessage, Task, TeamStatus } from "../types";
 import { Modal, StatusChip } from "../components/ui";
+import { bingoSlots, getPhotoClue, photoRegions } from '../data/photoClues';
+import { PhotoPreview } from './PhotoPreview';
 
 interface PlayerAppProps {
+  team: TeamStatus;
   tasks: Task[];
+  /** 后台审核状态的只读输入。玩家端不持有区域 setter。 */
+  approvedRegionId: string | null;
   cards: GameCard[];
   messages: GameMessage[];
   onLogout: () => void;
@@ -41,7 +45,9 @@ const cardNames: Record<GameCard["category"], string> = {
 };
 
 export function PlayerApp({
+  team,
   tasks,
+  approvedRegionId,
   cards,
   messages,
   onLogout,
@@ -56,10 +62,29 @@ export function PlayerApp({
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [cardTarget, setCardTarget] = useState("Arcaea队");
   const [showMessages, setShowMessages] = useState(false);
-  const currentTasks = useMemo(() => tasks.filter((task) => task.regionId === "stage-b").slice(0, 9), [tasks]);
+  const [motionEnabled, setMotionEnabled] = useState(true);
+  const [pageVisible, setPageVisible] = useState(true);
+  const region = photoRegions.find(item => item.id === approvedRegionId);
+  const regionId = region?.id ?? '';
+  const currentTasks = useMemo(() => tasks, [tasks]);
+  const selectedPhoto = selectedTask ? getPhotoClue(regionId, selectedTask.sharedSlot ?? '') : null;
+  const motionPaused = !motionEnabled || !pageVisible || Boolean(selectedTask || selectedCard || showMessages || playingCard);
   const unreadCount = messages.filter((message) => message.unread).length;
   const completedCount = currentTasks.filter((task) => task.state === "awarded").length;
   const pendingCount = currentTasks.filter((task) => task.state === "pending").length;
+
+  // 推进地区不替换任务集合，也不清空得分。关闭旧地区上传草稿，避免错交旧图。
+  useEffect(() => {
+    setSelectedTask(null);
+    setSelectedFile(null);
+  }, [approvedRegionId]);
+
+  useEffect(() => {
+    const updateVisibility = () => setPageVisible(document.visibilityState !== 'hidden');
+    updateVisibility();
+    document.addEventListener('visibilitychange', updateVisibility);
+    return () => document.removeEventListener('visibilitychange', updateVisibility);
+  }, []);
 
   useEffect(() => {
     if (!selectedFile) {
@@ -86,17 +111,17 @@ export function PlayerApp({
   };
 
   return (
-    <div className="app-shell app-shell--player player-console">
+    <div className={`app-shell app-shell--player player-console ${motionPaused ? 'photo-motion-paused' : ''}`}>
       <a className="skip-link" href="#main-content">跳到主要内容</a>
 
       <header className="topbar player-topbar player-console__topbar">
         <button className="brand-lockup" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })} aria-label="回到页面顶部">
           <span className="brand-mark" aria-hidden="true">H</span>
-          <div><strong>HRG // LIVE</strong><span>Phigros队 · B 区</span></div>
+          <div><strong>HRG // LIVE</strong><span>{team.name} · {region?.name ?? '等待区域审核'}</span></div>
         </button>
-        <div className="player-scoreline" aria-label="Phigros队当前信息">
-          <span><Trophy size={16} aria-hidden="true" /><b>126</b> PTS</span>
-          <span>RANK <b>#02</b></span>
+        <div className="player-scoreline" aria-label={`${team.name}当前信息`}>
+          <span><Trophy size={16} aria-hidden="true" /><b>{team.score}</b> PTS</span>
+          <span>RANK <b>#{String(team.rank).padStart(2, '0')}</b></span>
           <span><Clock3 size={16} aria-hidden="true" />公开排名 18:04</span>
         </div>
         <div className="topbar__actions">
@@ -114,36 +139,50 @@ export function PlayerApp({
           <section className="bingo-panel" aria-labelledby="bingo-title">
             <div className="bingo-panel__header">
               <div>
-                <p className="eyebrow">STAGE B · BINGO GRID</p>
-                <h1 id="bingo-title"><span>B</span> 任务矩阵</h1>
-                <p>任务内容只在格子内打开。每项任务仅提交一张现场原图。</p>
+                <p className="eyebrow">STAGE {region?.letter ?? '—'} · BINGO 5×5</p>
+                <h1 id="bingo-title"><span>{region?.letter ?? '—'}</span> 任务矩阵</h1>
+                <p>点开格子看清晰图与任务。19 张图寻 · 6 项直接任务。</p>
               </div>
-              <div className="bingo-summary" aria-label="本区域任务进度">
+              <div className="bingo-summary" aria-label="本队棋盘任务进度，换区后保留">
                 <span><b>{completedCount}</b> 已得分</span>
                 <span><b>{pendingCount}</b> 审核中</span>
                 <span><b>{currentTasks.length}</b> 格任务</span>
               </div>
             </div>
 
-            <div className="bingo-board" role="grid" aria-label="B 区任务棋盘">
-              {currentTasks.map((task, index) => (
+            <div className="bingo-toolbar">
+              <ol className="bingo-regions" aria-label="本队区域进度，只能由工作人员审核推进">
+                {photoRegions.map(item => <li key={item.id} className={regionId === item.id ? 'is-current' : (region && item.number < region.number ? 'is-passed' : 'is-locked')} aria-current={regionId === item.id ? 'step' : undefined} aria-label={`${item.name}，${regionId === item.id ? '当前区域' : region && item.number < region.number ? '已通过' : '待工作人员审核'}`}><span>{item.number}</span>{item.name}{!region || item.number > region.number ? <LockKeyhole size={13} aria-hidden="true" /> : null}</li>)}
+              </ol>
+              <button className="photo-motion-toggle" type="button" aria-pressed={!motionEnabled} onClick={() => setMotionEnabled(enabled => !enabled)}>{motionEnabled ? '暂停动效' : '开启动效'}</button>
+            </div>
+
+            <p className="region-rule-note" role="status">{region ? `当前：${region.name}。下一地区入口经工作人员审核通过后，本队图寻图片统一更新。` : '等待工作人员审核区域入口，尚未开放图寻图片。'}</p>
+            <div className="bingo-board bingo-board--photos" role="group" aria-label={`${region?.name ?? '待区域审核'} 5乘5任务棋盘`}>
+              {currentTasks.map((task, index) => {
+                const slot = task.sharedSlot ?? bingoSlots[index];
+                const photo = getPhotoClue(regionId, slot);
+                const stateLabel = task.state === 'pending' ? '审核中' : task.state === 'awarded' ? '已有归属' : task.state === 'locked' ? '未解锁' : task.configured === false ? '待配置' : '可提交';
+                return (
                 <button
-                  className={`bingo-cell bingo-cell--${task.state} ${task.imageTone}`}
+                  className={`bingo-cell bingo-cell--${task.state} ${task.imageTone} ${photo ? 'bingo-cell--photo' : 'bingo-cell--direct'}`}
                   key={task.id}
                   onClick={() => setSelectedTask(task)}
-                  role="gridcell"
-                  aria-label={`第 ${index + 1} 格，${task.state === "pending" ? "审核中" : task.state === "awarded" ? "已有归属" : "可提交"}，打开任务详情`}
+                  style={{ '--cell-order': index } as CSSProperties}
+                  aria-label={`第 ${index + 1} 格，${photo ? `图寻图片 #${photo.number}` : '无需图寻'}，${stateLabel}，打开任务详情`}
                 >
-                  <span className="bingo-cell__number">{String(index + 1).padStart(2, "0")}</span>
-                  <span className="bingo-cell__focus"><Crosshair size={26} aria-hidden="true" /><i>OPEN</i></span>
+                  {photo ? <PhotoPreview key={photo.preview} photo={photo} order={index} /> : <span className="bingo-cell__direct-art" aria-hidden="true">{slot.startsWith('P') ? <LockKeyhole size={24} /> : <Zap size={24} />}</span>}
+                  <span className="bingo-cell__number">{photo ? `#${photo.number}` : slot}</span>
+                  <span className="bingo-cell__open" aria-hidden="true">{photo ? '图寻' : '直接'}<ChevronRight size={13} /></span>
                   <span className="bingo-cell__footer">
-                    <b>{task.points}</b> 分
-                    <i>{task.state === "pending" ? `${task.pendingCount ?? 1} 队审核中` : task.state === "awarded" ? "已有归属" : "查看"}</i>
+                    {task.configured === false ? <small>待配置</small> : <span><b>{task.points}</b> 分</span>}
+                    <i>{task.state === 'pending' ? `${task.pendingCount ?? 1} 队审核中` : task.state === 'awarded' ? '已有归属' : task.state === 'locked' ? '未解锁' : '查看'}</i>
                   </span>
                   {task.state === "pending" ? <span className="bingo-cell__state"><Clock3 size={15} aria-hidden="true" /></span> : null}
                   {task.state === "awarded" ? <span className="bingo-cell__state"><Check size={15} aria-hidden="true" /></span> : null}
                 </button>
-              ))}
+                );
+              })}
             </div>
           </section>
 
@@ -193,9 +232,9 @@ export function PlayerApp({
             <span className="player-map__scan" />
             <span className="player-map__path player-map__path--one" />
             <span className="player-map__path player-map__path--two" />
-            <span className="player-map__label player-map__label--lake">ZONE B / 02</span>
-            <span className="player-map__label player-map__label--region">补给点 B-4</span>
-            <span className="player-map__marker"><Navigation size={28} fill="currentColor" aria-hidden="true" /><i>PHIGROS</i></span>
+            <span className="player-map__label player-map__label--lake">ZONE {region?.letter ?? '—'} / {region?.number ?? '—'}</span>
+            <span className="player-map__label player-map__label--region">{region?.name ?? '等待区域审核'}</span>
+            <span className="player-map__marker"><Navigation size={28} fill="currentColor" aria-hidden="true" /><i>{team.shortName}</i></span>
             <span className="player-map__target"><Flag size={18} aria-hidden="true" /><i>终点包厢</i></span>
           </div>
 
@@ -207,7 +246,7 @@ export function PlayerApp({
 
           <div className="route-card">
             <span className="route-card__icon"><Route size={20} aria-hidden="true" /></span>
-            <div><small>当前路线</small><strong>B 区 → C 区入口</strong><p>完成本区后前往下一处图寻点。</p></div>
+            <div><small>当前区域</small><strong>{region?.name ?? '等待审核'}</strong><p>入口图寻由工作人员审核，通过后才能推进地区。</p></div>
             <ChevronRight size={19} aria-hidden="true" />
           </div>
 
@@ -226,15 +265,15 @@ export function PlayerApp({
 
       {selectedTask ? (
         <Modal title={selectedTask.title} description={selectedTask.brief} onClose={closeTask}>
-          <div className={`task-visual task-visual--large ${selectedTask.imageTone}`}>
-            <span>{selectedTask.id}</span><Camera size={30} aria-hidden="true" />
-          </div>
+          {selectedPhoto ? <figure className="task-photo" key={selectedPhoto.detail}>
+            <a className="task-photo__image" href={selectedPhoto.original} target="_blank" rel="noopener noreferrer" aria-label={`查看图寻图片 #${selectedPhoto.number} 原尺寸清晰图`}><img src={selectedPhoto.detail} alt={`${region?.name} 图寻图片 #${selectedPhoto.number}`} decoding="async" /></a>
+            <figcaption><span>图寻 #{selectedPhoto.number}</span><a href={selectedPhoto.original} target="_blank" rel="noopener noreferrer">打开原尺寸图 ↗</a></figcaption>
+          </figure> : <div className="task-direct-note">{selectedTask.sharedSlot?.startsWith('P') ? <><LockKeyhole size={22} aria-hidden="true" /><span>区域入口尚未审核通过，图寻图片未开放。</span></> : <><Zap size={22} aria-hidden="true" /><span>此格无需图寻，按任务要求完成即可。</span></>}</div>}
           <div className="detail-meta">
-            <StatusChip tone={selectedTask.difficulty === "挑战" ? "danger" : selectedTask.difficulty === "标准" ? "warning" : "success"}>{selectedTask.difficulty}</StatusChip>
-            <strong>{selectedTask.points} 分</strong>
+            {selectedTask.configured === false ? <StatusChip tone="neutral">待配置</StatusChip> : <><StatusChip tone={selectedTask.difficulty === "挑战" ? "danger" : selectedTask.difficulty === "标准" ? "warning" : "success"}>{selectedTask.difficulty}</StatusChip><strong>{selectedTask.points} 分</strong></>}
             {selectedTask.pendingCount ? <span>{selectedTask.pendingCount} 队审核中</span> : null}
           </div>
-          {selectedTask.state === "locked" ? (
+          {!region && selectedTask.sharedSlot?.startsWith('P') ? <div className="locked-panel"><LockKeyhole size={24} aria-hidden="true" /><div><strong>等待入口审核</strong><p>工作人员通过后才开放本区域图片。</p></div></div> : selectedTask.configured === false ? <div className="locked-panel"><Camera size={24} aria-hidden="true" /><div><strong>任务待配置</strong><p>图片已接入，正式任务与分值尚未填写，暂不开放提交。</p></div></div> : selectedTask.state === "locked" ? (
             <div className="locked-panel"><LockKeyhole size={24} aria-hidden="true" /><div><strong>还没解锁</strong><p>先通过本区图寻题。</p></div></div>
           ) : (
             <>

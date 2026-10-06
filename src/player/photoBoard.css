@@ -1,0 +1,69 @@
+/* Blurred artwork is a preview, never a substitute for the clear clue in the modal. */
+.bingo-toolbar { display:flex;align-items:center;justify-content:space-between;gap:12px;margin:18px 0 16px; }
+.bingo-regions { display:flex;flex-wrap:wrap;gap:8px;list-style:none;padding:0;margin:0; }
+.bingo-regions li,.photo-motion-toggle { min-height:44px;padding:9px 12px;border:1px solid var(--line);border-radius:5px;background:var(--surface);color:var(--ink-soft);font:inherit;font-size:.78rem; }
+.bingo-regions li { display:flex;align-items:center;gap:8px; }
+.bingo-regions li span { font-size:.68rem;font-weight:850;opacity:.7; }
+.bingo-regions .is-current { color:var(--lime);border-color:var(--lime);background:var(--surface-2); }
+.bingo-regions .is-locked { opacity:.6; }
+.photo-motion-toggle { cursor:pointer;touch-action:manipulation; }
+.photo-motion-toggle:focus-visible { outline:2px solid var(--lime);outline-offset:3px; }
+.region-rule-note { color:var(--ink-soft);font-size:.78rem;line-height:1.6;margin:0 0 14px; }
+.photo-motion-toggle { flex-shrink:0; }
+.bingo-board--photos { grid-template-columns:repeat(5,minmax(0,1fr));gap:8px; }
+.bingo-board--photos .bingo-cell { aspect-ratio:1;min-height:44px;animation-delay:calc(var(--cell-order) * 16ms);touch-action:manipulation; }
+.bingo-board--photos .bingo-cell::before { z-index:0;opacity:1;transform:none;background:linear-gradient(180deg,rgba(3,7,12,.56),rgba(3,7,12,.08) 42%,rgba(3,7,12,.83));pointer-events:none; }
+.bingo-board--photos .bingo-cell::after { display:none; }
+.bingo-board--photos .bingo-cell:hover,.bingo-board--photos .bingo-cell:focus-visible { transform:translateY(-2px); }
+.bingo-board--photos .bingo-cell__number { z-index:1;color:#fff;font-size:.84rem;letter-spacing:.02em; }
+.bingo-cell__open { position:absolute;z-index:1;display:flex;align-items:center;justify-content:center;gap:2px;left:50%;top:51%;transform:translate(-50%,-50%);padding:5px 7px;border:1px solid rgba(255,255,255,.3);border-radius:4px;background:rgba(7,9,7,.62);color:#f5f7f2;font-size:.68rem;white-space:nowrap;opacity:.82;transition:opacity var(--motion-fast),border-color var(--motion-fast); }
+.bingo-cell:hover .bingo-cell__open,.bingo-cell:focus-visible .bingo-cell__open { opacity:1;border-color:var(--cell-accent,var(--lime)); }
+.bingo-board--photos .bingo-cell__footer { z-index:1;align-items:center;gap:2px; }
+.bingo-cell__footer small { color:#d9e3e7;font-size:.65rem; }
+.bingo-board--photos .bingo-cell__footer b { font-size:.98rem; }
+.bingo-board--photos .bingo-cell__state { z-index:2; }
+.photo-preview { position:absolute;inset:0;z-index:-1;overflow:hidden;pointer-events:none;background:var(--surface-2); }
+.photo-preview img { position:absolute;inset:-12%;width:124%;height:124%;object-fit:cover;opacity:0;transition:opacity 360ms var(--ease-out); }
+.photo-preview.is-loaded img { opacity:1; }
+.photo-preview__base { filter:blur(7px) saturate(.85);transform:scale(1.02); }
+.photo-preview img.photo-preview__haze { filter:blur(15px) saturate(.95);opacity:0; }
+.photo-preview.is-loaded img.photo-preview__haze { opacity:.45; }
+/* Static blur textures crossfade instead of recalculating a blur filter every frame. */
+.photo-preview.is-visible .photo-preview__haze { animation:clue-fog 7s var(--photo-delay) ease-in-out 2; }
+.photo-motion-paused .photo-preview__haze { animation-play-state:paused; }
+.bingo-cell:focus-visible .photo-preview__haze { animation-play-state:paused; }
+.photo-preview:not(.is-visible) .photo-preview__haze { animation-play-state:paused; }
+.photo-preview__error { display:grid;place-items:center;height:100%;padding:18px;color:var(--ink-soft);font-size:.7rem; }
+.bingo-cell--direct { background:linear-gradient(145deg,var(--surface-2),#172519); }
+.bingo-cell__direct-art { position:absolute;inset:0;z-index:-1;display:flex;align-items:center;justify-content:center;gap:6px;color:var(--lime);opacity:.22; }
+.bingo-cell__direct-art i { display:none; }
+.task-photo { margin:0;background:#0b100e;border:1px solid var(--line);border-radius:7px;overflow:hidden; }
+.task-photo__image { display:grid;place-items:center;min-height:200px;cursor:zoom-in; }
+.task-photo__image img { display:block;width:100%;max-height:440px;object-fit:contain;filter:none; }
+.task-photo figcaption { display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 14px;border-top:1px solid var(--line);font-size:.8rem;color:var(--ink-soft); }
+.task-photo figcaption a { padding:6px 0;color:var(--lime); }
+.task-photo a:focus-visible { outline:2px solid var(--lime);outline-offset:-3px; }
+.task-direct-note { display:flex;align-items:center;gap:12px;padding:18px;background:var(--surface-2);border:1px solid var(--line);color:var(--ink-soft); }
+@keyframes clue-fog { 0%,100% { opacity:.45;transform:translate3d(0,0,0) scale(1); } 50% { opacity:.8;transform:translate3d(1.5%,-1%,0) scale(1.045); } }
+@media(max-width:560px) {
+  .bingo-toolbar { align-items:flex-start;gap:8px;flex-wrap:wrap; }
+  .bingo-regions { width:100%;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px; }
+  .bingo-regions li { padding:8px 5px;gap:3px;justify-content:center;font-size:.65rem; }
+  .bingo-regions li span { display:none; }
+  .photo-motion-toggle { margin-left:auto;min-height:44px;padding:5px 9px;font-size:.68rem; }
+  .bingo-board--photos { grid-template-columns:repeat(5,minmax(0,1fr));gap:5px; }
+  .bingo-board--photos .bingo-cell { aspect-ratio:.8; }
+  .bingo-board--photos .bingo-cell__number { left:5px;top:5px;font-size:.68rem; }
+  .bingo-cell__open { border:0;background:transparent;padding:0;font-size:.6rem; }
+  .bingo-cell__open svg { display:none; }
+  .bingo-board--photos .bingo-cell__footer { left:5px;right:3px;bottom:5px;font-size:.6rem; }
+  .bingo-board--photos .bingo-cell__footer b { font-size:.74rem; }
+  .bingo-cell__footer small { font-size:.56rem; }
+  .bingo-board--photos .bingo-cell__state { width:16px;height:16px;right:3px;top:3px; }
+  .bingo-board--photos .bingo-cell__state svg { width:10px;height:10px; }
+  .task-photo__image { min-height:140px; }
+}
+@media(prefers-reduced-motion:reduce) {
+  .photo-preview.is-visible .photo-preview__haze { animation:none!important;opacity:.45;transform:none; }
+  .bingo-board--photos .bingo-cell { animation:none!important; }
+}

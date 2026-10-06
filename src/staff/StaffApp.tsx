@@ -29,6 +29,8 @@ import {
 } from "lucide-react";
 import { SectionHeading, StatusChip } from "../components/ui";
 import type { AuditItem, StaffTab, TeamStatus } from "../types";
+import type { RegionAuditLog } from '../domain/regionProgress';
+import { photoRegions } from '../data/photoClues';
 
 interface StaffAppProps {
   auditQueue: AuditItem[];
@@ -36,6 +38,7 @@ interface StaffAppProps {
   onReview: (itemId: string, result: "approve" | "reject") => void;
   onFinishTeam: (teamId: string) => void;
   onLogout: () => void;
+  regionAuditLog?: RegionAuditLog[];
 }
 
 const navItems: { id: StaffTab; label: string; icon: typeof House }[] = [
@@ -45,7 +48,7 @@ const navItems: { id: StaffTab; label: string; icon: typeof House }[] = [
   { id: "control", label: "控制", icon: ShieldCheck }
 ];
 
-export function StaffApp({ auditQueue, teams, onReview, onFinishTeam, onLogout }: StaffAppProps) {
+export function StaffApp({ auditQueue, teams, onReview, onFinishTeam, onLogout, regionAuditLog = [] }: StaffAppProps) {
   const [tab, setTab] = useState<StaffTab>("overview");
   const [gamePaused, setGamePaused] = useState(false);
 
@@ -104,6 +107,7 @@ export function StaffApp({ auditQueue, teams, onReview, onFinishTeam, onLogout }
                 gamePaused={gamePaused}
                 onTogglePause={() => setGamePaused((current) => !current)}
                 onFinishTeam={onFinishTeam}
+                regionAuditLog={regionAuditLog}
               />
             ) : null}
           </div>
@@ -250,6 +254,7 @@ function ReviewWorkspace({ auditQueue, onReview }: { auditQueue: AuditItem[]; on
           <button className="button button--reject" onClick={() => onReview(current.id, "reject")}><X size={19} aria-hidden="true" />打回重交</button>
           <button className="button button--approve" onClick={() => onReview(current.id, "approve")}><Check size={19} aria-hidden="true" />审核通过</button>
         </div>
+        {current.kind === '图寻题' ? <p className="panel-intro">这是区域入口审核。通过后只推进{current.team}至{photoRegions.find(r => r.id === current.targetRegionId)?.name ?? '（目标缺失，不能推进）'}，本队 19 张图片统一替换；不重置任务、分数或其他队进度。打回时保持当前区域。</p> : null}
       </section>
     </div>
   );
@@ -314,12 +319,14 @@ function ControlWorkspace({
   teams,
   gamePaused,
   onTogglePause,
-  onFinishTeam
+  onFinishTeam,
+  regionAuditLog
 }: {
   teams: TeamStatus[];
   gamePaused: boolean;
   onTogglePause: () => void;
   onFinishTeam: (id: string) => void;
+  regionAuditLog: RegionAuditLog[];
 }) {
   const allFinished = teams.every((team) => team.status === "finished");
   return (
@@ -367,6 +374,7 @@ function ControlWorkspace({
         <article className="staff-panel">
           <SectionHeading eyebrow="AUDIT" title="最近操作" />
           <ul className="audit-mini-list">
+            {regionAuditLog.slice(-5).reverse().map(log => <li key={log.auditId}><span>{new Date(log.reviewedAt).toLocaleTimeString('zh-CN',{hour:'2-digit',minute:'2-digit'})}</span><p><strong>{log.operatorId}</strong> {log.result === 'approve' ? '通过' : '打回'}了{teams.find(t=>t.id===log.teamId)?.name}的{photoRegions.find(r=>r.id===log.to)?.name}入口审核</p></li>)}
             <li><span>14:28</span><p><strong>STAFF 01</strong> 通过了“同步判定”</p></li>
             <li><span>14:26</span><p><strong>STAFF 02</strong> 发放了随机事件</p></li>
             <li><span>14:25</span><p><strong>系统</strong> 完成数据库备份</p></li>

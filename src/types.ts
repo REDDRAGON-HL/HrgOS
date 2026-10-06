@@ -29,6 +29,8 @@ export interface Task {
   imageTone: string;
   pendingCount?: number;
   awardedTeam?: string;
+  sharedSlot?: string;
+  configured?: boolean;
 }
 
 export interface GameCard {
@@ -72,6 +74,9 @@ export interface AuditItem {
   waitingSeconds: number;
   imageTone: string;
   checklist: string[];
+  /** 区域入口审核必须带明确目标，不得从任务文案猜测。 */
+  teamId?: string;
+  targetRegionId?: string;
 }
 
 export interface ToastState {

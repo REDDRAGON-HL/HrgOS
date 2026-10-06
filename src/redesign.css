@@ -1,5 +1,44 @@
 /* 2026 competitive interface — references: Showreel density, Aceternity depth,
    Uiverse component tactility and Anime.js motion rhythm. */
+.waiting-screen {
+  position: relative;
+  display: grid;
+  min-height: 100vh;
+  min-height: 100svh;
+  place-items: center;
+  isolation: isolate;
+  padding: max(24px, env(safe-area-inset-top)) max(20px, env(safe-area-inset-right)) max(24px, env(safe-area-inset-bottom)) max(20px, env(safe-area-inset-left));
+  color: #f5f7f2;
+  background: #070907 url("/images/game-waiting-background.png") center / cover no-repeat;
+}
+
+.waiting-screen::before {
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  content: "";
+  background: radial-gradient(ellipse at center, rgba(7, 9, 7, 0.7), rgba(7, 9, 7, 0.16) 70%);
+}
+
+.waiting-screen h1 {
+  margin: 0;
+  padding: 28px 0;
+  border-top: 1px solid rgba(200, 255, 50, 0.4);
+  border-bottom: 1px solid rgba(200, 255, 50, 0.4);
+  font-size: clamp(1.75rem, 4.5vw, 3.5rem);
+  font-weight: 760;
+  line-height: 1.4;
+  letter-spacing: 0.12em;
+  text-align: center;
+  text-shadow: 0 2px 18px #070907;
+}
+
+@media (max-width: 640px) {
+  .waiting-screen {
+    background-position: 24% center;
+  }
+}
+
 :root {
   --bg: #070907;
   --surface: #0d100e;

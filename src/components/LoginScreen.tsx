@@ -2,15 +2,14 @@ import { useState } from "react";
 import { BellRing, Eye, EyeOff, Grid3X3, MapPinned, Radio, ShieldCheck, Smartphone, Swords } from "lucide-react";
 import type { UserMode } from "../types";
 
-export function LoginScreen({ onLogin }: { onLogin: (mode: UserMode) => void }) {
+export function LoginScreen({ onLogin }: { onLogin: (mode: UserMode, username: string, password: string) => void }) {
   const [mode, setMode] = useState<UserMode>("player");
   const [showPassword, setShowPassword] = useState(false);
-  const [username, setUsername] = useState("player01");
-  const [password, setPassword] = useState("demo2026");
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
 
   const selectMode = (nextMode: UserMode) => {
     setMode(nextMode);
-    setUsername(nextMode === "player" ? "player01" : "staff01");
   };
 
   return (
@@ -48,7 +47,7 @@ export function LoginScreen({ onLogin }: { onLogin: (mode: UserMode) => void }) 
           <div>
             <p className="eyebrow">ACCESS GATE / 01</p>
             <h2>进入比赛</h2>
-            <p className="muted-copy">选择身份，载入对应控制台。</p>
+            <p className="muted-copy">选择身份，登录活动账号。</p>
           </div>
 
           <div className="role-switch" role="tablist" aria-label="账号类型">
@@ -76,12 +75,12 @@ export function LoginScreen({ onLogin }: { onLogin: (mode: UserMode) => void }) 
             className="login-form"
             onSubmit={(event) => {
               event.preventDefault();
-              onLogin(mode);
+              onLogin(mode, username, password);
             }}
           >
             <label>
               <span>账号</span>
-              <input value={username} onChange={(event) => setUsername(event.target.value)} autoComplete="username" />
+              <input value={username} onChange={(event) => setUsername(event.target.value)} autoComplete="username" placeholder="请输入账号" />
             </label>
             <label>
               <span>密码</span>
@@ -91,6 +90,7 @@ export function LoginScreen({ onLogin }: { onLogin: (mode: UserMode) => void }) 
                   value={password}
                   onChange={(event) => setPassword(event.target.value)}
                   autoComplete="current-password"
+                  placeholder="请输入密码"
                 />
                 <button type="button" onClick={() => setShowPassword((current) => !current)} aria-label={showPassword ? "隐藏密码" : "显示密码"}>
                   {showPassword ? <EyeOff size={18} aria-hidden="true" /> : <Eye size={18} aria-hidden="true" />}
@@ -98,7 +98,7 @@ export function LoginScreen({ onLogin }: { onLogin: (mode: UserMode) => void }) 
               </span>
             </label>
             <button className="button button--primary button--full" type="submit">
-              {mode === "player" ? "进入 Phigros队" : "进入工作人员后台"}
+              登录
             </button>
           </form>
 

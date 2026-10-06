@@ -1,0 +1,184 @@
+import { useCallback, useRef, useState } from "react";
+import { ToastStack } from "./components/ui";
+import { WaitingScreen } from "./components/WaitingScreen";
+import type { LoginSession } from "./domain/loginAccess";
+import { initialAuditQueue, initialBingoTasks, initialCards, initialMessages, teams as initialTeams } from "./data/mock";
+import { enqueueAuditItem } from "./domain/auditQueue";
+import { reviewAudit, type ReviewState } from './domain/regionProgress';
+import { PlayerApp } from "./player/PlayerApp";
+import { StaffApp } from "./staff/StaffApp";
+import type { GameCard, GameMessage, Task, ToastState, UserMode } from "./types";
+
+function nowLabel() {
+  return new Intl.DateTimeFormat("zh-CN", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false
+  }).format(new Date());
+}
+
+export default function DemoApp({ mode, account, onLogout }: { mode: UserMode; account: LoginSession; onLogout: () => void }) {
+  const [tasks, setTasks] = useState<Task[]>(initialBingoTasks);
+  const [cards, setCards] = useState<GameCard[]>(initialCards);
+  const [messages, setMessages] = useState<GameMessage[]>(() => {
+    const team = initialTeams.find((candidate) => candidate.id === account.teamId);
+    return initialMessages.map((message) => ({
+      ...message,
+      body: team ? message.body.replaceAll("Phigros队", team.name) : message.body
+    }));
+  });
+  const [reviewState, setReviewState] = useState<ReviewState>({
+    auditQueue: initialAuditQueue, teams: initialTeams, regionAuditLog: [],
+    regionProgress: {
+      'team-1': {currentRegionId:'stage-b',version:2}, 'team-2': {currentRegionId:'stage-b',version:2},
+      'team-3': {currentRegionId:'stage-a',version:1}, 'team-4': {currentRegionId:'stage-c',version:3},
+      'team-5': {currentRegionId:'stage-a',version:1}
+    }
+  });
+  const { auditQueue, teams, regionProgress, regionAuditLog } = reviewState;
+  const playerTeam = teams.find((team) => team.id === account.teamId);
+  const [toasts, setToasts] = useState<ToastState[]>([]);
+  const toastId = useRef(0);
+
+  const notify = useCallback((toast: Omit<ToastState, "id">) => {
+    const id = ++toastId.current;
+    setToasts((current) => [...current, { ...toast, id }]);
+    window.setTimeout(() => {
+      setToasts((current) => current.filter((item) => item.id !== id));
+    }, 3600);
+  }, []);
+
+  const handleSubmitTask = (taskId: string, filename: string) => {
+    const task = tasks.find((item) => item.id === taskId);
+    if (!task || !playerTeam) return;
+
+    setTasks((current) => current.map((item) => (
+      item.id === taskId
+        ? { ...item, state: "pending", pendingCount: (item.pendingCount ?? 0) + 1 }
+        : item
+    )));
+    setReviewState((current) => ({ ...current, auditQueue: enqueueAuditItem(current.auditQueue, {
+        id: `A-${Date.now()}`,
+        kind: "普通任务",
+        team: playerTeam.name,
+        teamId: playerTeam.id,
+        task: task.title,
+        submittedAt: `${nowLabel()}:00`,
+        waitingSeconds: 0,
+        imageTone: task.imageTone,
+        checklist: ["符合任务画面要求", "包含有效队伍信息", "为活动现场原图"]
+      }) }));
+    setMessages((current) => [
+      {
+        id: `M-${Date.now()}`,
+        type: "review",
+        title: "提交已进入审核队列",
+        body: `“${task.title}”的图片 ${filename} 已按提交时间排队。`,
+        time: nowLabel(),
+        unread: true
+      },
+      ...current
+    ]);
+    notify({ tone: "success", title: "提交成功", body: "已按服务器时间加入审核队列。" });
+  };
+
+  const handleUseCard = (cardId: string, target: string) => {
+    const card = cards.find((item) => item.id === cardId);
+    if (!card) return;
+    setCards((current) => current
+      .map((item) => item.id === cardId ? { ...item, uses: item.uses - 1 } : item)
+      .filter((item) => item.uses > 0));
+    setMessages((current) => [
+      {
+        id: `M-${Date.now()}`,
+        type: "card",
+        title: card.needsConfirmation ? "道具卡等待确认" : "道具卡已生效",
+        body: `“${card.name}”已对${target}使用。${card.needsConfirmation ? "工作人员确认后生效。" : "效果已写入活动账本。"}`,
+        time: nowLabel(),
+        unread: true
+      },
+      ...current
+    ]);
+    notify({
+      tone: card.needsConfirmation ? "warning" : "success",
+      title: card.needsConfirmation ? "等待工作人员确认" : "道具卡已生效",
+      body: `${card.name} → ${target}`
+    });
+  };
+
+  const handleReview = (itemId: string, result: "approve" | "reject") => {
+    const item = auditQueue.find((queueItem) => queueItem.id === itemId);
+    if (!item) return;
+    const command = {itemId,result,actor:mode,operatorId:account.username,reviewedAt:new Date().toISOString()};
+    const next = reviewAudit(reviewState, command);
+    if (next === reviewState) {
+      notify({tone:'warning',title:'未更改区域',body:'请检查队首、队伍和下一地区的审核目标。'});
+      return;
+    }
+    setReviewState(current => reviewAudit(current, command));
+    const entrance = item.kind === '图寻题';
+    setMessages((current) => [
+      {
+        id: `M-${Date.now()}`,
+        type: "review",
+        title: result === "approve" ? (entrance ? "区域入口审核通过" : "任务审核通过") : "任务需要重新提交",
+        body: result === "approve"
+          ? (entrance ? `${item.team}的区域入口已通过，本队 19 张图寻图片统一更新；任务和分数保留。` : `“${item.task}”已审核通过，结果已写入账本。`)
+          : `“${item.task}”已打回；任务完成状态不变，请重新上传照片。`,
+        time: nowLabel(),
+        unread: true
+      },
+      ...current
+    ]);
+    notify({
+      tone: result === "approve" ? "success" : "warning",
+      title: result === "approve" ? "审核已通过" : "已打回重交",
+      body: `${item.team} · ${item.task}`
+    });
+  };
+
+  const handleFinishTeam = (teamId: string) => {
+    const team = teams.find((item) => item.id === teamId);
+    if (!team) return;
+    setReviewState((current) => ({...current,teams:current.teams.map((item) => item.id === teamId
+      ? {
+          ...item,
+          status: "finished",
+          region: "工作人员包厢",
+          lastSeen: `${nowLabel()} 完赛`,
+          color: "#c89217"
+        }
+      : item)}));
+    notify({ tone: "success", title: "已确认完赛", body: `${team.name}的位置标记已固定为金色。` });
+  };
+
+  return (
+    <>
+      {mode === "player" ? (playerTeam ? (
+        <PlayerApp
+          team={playerTeam}
+          tasks={tasks}
+          approvedRegionId={regionProgress[playerTeam.id]?.currentRegionId ?? null}
+          cards={cards}
+          messages={messages}
+          onLogout={onLogout}
+          onSubmitTask={handleSubmitTask}
+          onUseCard={handleUseCard}
+          onReadMessage={(messageId) => setMessages((current) => current.map((message) => (
+            message.id === messageId ? { ...message, unread: false } : message
+          )))}
+        />
+      ) : <WaitingScreen />) : (
+        <StaffApp
+          regionAuditLog={regionAuditLog}
+          auditQueue={auditQueue}
+          teams={teams}
+          onReview={handleReview}
+          onFinishTeam={handleFinishTeam}
+          onLogout={onLogout}
+        />
+      )}
+      <ToastStack toasts={toasts} />
+    </>
+  );
+}

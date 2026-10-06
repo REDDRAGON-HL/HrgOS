@@ -4,6 +4,7 @@ import { registerSW } from "virtual:pwa-register";
 import App from "./App";
 import "./styles.css";
 import "./redesign.css";
+import "./player/photoBoard.css";
 
 registerSW({ immediate: true });
 

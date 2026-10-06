@@ -1,4 +1,5 @@
 import type { AuditItem, GameCard, GameMessage, Region, Task, TeamStatus } from "../types";
+import { bingoSlots, photoRegions } from './photoClues';
 
 export const regions: Region[] = [
   { id: "stage-a", sequence: 1, name: "A 区", subtitle: "起始赛段 · 已完成", imageTone: "tone-cyan", clue: "找到与参考图一致的入口编号", state: "complete", progress: 100 },
@@ -6,7 +7,7 @@ export const regions: Region[] = [
   { id: "stage-c", sequence: 3, name: "C 区", subtitle: "等待上一赛段结束", imageTone: "tone-magenta", clue: "找到两个编号同时进入画面的拍摄点", state: "upcoming", progress: 0 }
 ];
 
-export const initialTasks: Task[] = [
+const existingTasks: Task[] = [
   { id: "T-201", regionId: "stage-b", title: "同步判定", brief: "两名队员在指定标记前完成同一动作，动作误差不超过一拍。", points: 12, difficulty: "标准", state: "available", imageTone: "tone-lime" },
   { id: "T-202", regionId: "stage-b", title: "极限连击", brief: "按参考顺序完成三处打卡，并把三个编号拍进同一张照片。", points: 18, difficulty: "挑战", state: "pending", imageTone: "tone-cyan", pendingCount: 2 },
   { id: "T-203", regionId: "stage-b", title: "盲区协作", brief: "一人只看提示，一人完成指定站位；最终照片需包含完整标记。", points: 8, difficulty: "轻松", state: "available", imageTone: "tone-violet" },
@@ -18,6 +19,30 @@ export const initialTasks: Task[] = [
   { id: "T-210", regionId: "stage-b", title: "终局加速", brief: "在倒计时结束前完成连续动作，两名队员都需完整出镜。", points: 20, difficulty: "挑战", state: "available", imageTone: "tone-magenta" },
   { id: "T-206", regionId: "stage-c", title: "双点锁定", brief: "通过 C 区图寻题后显示完整任务。", points: 16, difficulty: "挑战", state: "locked", imageTone: "tone-magenta" }
 ];
+
+// Preserve existing demo task text/state. New slots remain explicitly unconfigured.
+export const initialTasks: Task[] = photoRegions.flatMap(region => {
+  const existing = existingTasks.filter(task => task.regionId === region.id);
+  return bingoSlots.map(sharedSlot => {
+    const seed = sharedSlot.startsWith('P') ? existing[Number(sharedSlot.slice(1)) - 1] : undefined;
+    if (seed) return { ...seed, sharedSlot, configured: true };
+    return {
+      id: `T-${region.letter}-${sharedSlot}`,
+      regionId: region.id,
+      sharedSlot,
+      configured: false,
+      title: `${sharedSlot.startsWith('P') ? '图寻' : '直接'}任务 · ${sharedSlot}`,
+      brief: '正式任务内容待工作人员配置。',
+      points: 0,
+      difficulty: '标准' as const,
+      state: region.id === 'stage-c' ? 'locked' as const : 'available' as const,
+      imageTone: 'tone-cyan'
+    };
+  });
+});
+
+// 赛事棋盘是固定 25 项任务。旧分区样稿保留，但不随区域推进切换任务集。
+export const initialBingoTasks = initialTasks.filter(task => task.regionId === 'stage-b');
 
 export const initialCards: GameCard[] = [
   { id: "C-01", name: "SCORE SCAN", description: "查看指定队伍当前总分，持续 5 分钟。", category: "intel", uses: 1 },
@@ -42,6 +67,6 @@ export const teams: TeamStatus[] = [
 
 export const initialAuditQueue: AuditItem[] = [
   { id: "A-108", kind: "普通任务", team: "CHUNITHM队", task: "极限连击", submittedAt: "14:28:16", waitingSeconds: 42, imageTone: "tone-cyan", checklist: ["两名队员至少一人出镜", "三个编号清晰可辨", "画面为现场原图"] },
-  { id: "A-109", kind: "图寻题", team: "Rotaeno队", task: "B 区 · 入口图寻", submittedAt: "14:28:41", waitingSeconds: 17, imageTone: "tone-lime", checklist: ["与参考图为同一入口标识", "画面包含本队成员", "位置编号完整"] },
+  { id: "A-109", kind: "图寻题", teamId: "team-5", targetRegionId: "stage-b", team: "Rotaeno队", task: "B 区 · 入口图寻", submittedAt: "14:28:41", waitingSeconds: 17, imageTone: "tone-lime", checklist: ["与参考图为同一入口标识", "画面包含本队成员", "位置编号完整"] },
   { id: "A-110", kind: "普通任务", team: "Phigros队", task: "盲区协作", submittedAt: "14:28:52", waitingSeconds: 6, imageTone: "tone-violet", checklist: ["站位与参考一致", "队友完整出镜", "未遮挡公共通道"] }
 ];

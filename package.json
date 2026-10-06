@@ -7,15 +7,27 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "preview": "vite preview",
-    "test": "vitest run"
+    "test": "vitest run",
+    "test:backend": "node --test server/rules.check.mjs server/persistence.check.mjs",
+    "test:rules": "node --env-file-if-exists=.env.test.local scripts/test-rules.mjs",
+    "test:rules:local": "node scripts/test-rules.mjs --local",
+    "test:lab": "node scripts/start-test-lab.mjs",
+    "server": "node --env-file-if-exists=.env.test.local server/start.mjs"
   },
   "dependencies": {
+    "@fastify/cors": "^11.3.0",
+    "@fastify/websocket": "^11.3.3",
     "@fontpkg/alimama-fang-yuan-ti-vf": "^1.0.5",
+    "@noble/hashes": "1.8.0",
+    "fastify": "^5.12.5",
     "lucide-react": "^0.468.0",
+    "pg": "^8.23.1",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-dom": "^19.0.0",
+    "sharp": "^0.34.5"
   },
   "devDependencies": {
+    "@electric-sql/pglite": "^0.3.16",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
     "@vitejs/plugin-react": "^4.3.4",
