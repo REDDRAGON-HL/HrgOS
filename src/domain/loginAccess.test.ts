@@ -9,17 +9,17 @@ const fixtures: readonly LoginAccount[] = [
 ];
 
 describe("活动账号登录权限", () => {
-  it("20 个玩家按账号顺序分成 5 队，每队 4 人；工作人员不参与分组", () => {
+  it("报名名单对应 5 队，每队 3 人；工作人员不参与分组", () => {
     const expected = [
-      ["team-1", ["01", "02", "03", "04"]],
-      ["team-2", ["05", "06", "07", "08"]],
-      ["team-3", ["09", "10", "11", "12"]],
-      ["team-4", ["13", "14", "15", "16"]],
-      ["team-5", ["17", "18", "19", "20"]]
+      ["team-1", ["fuqi01", "sendaotianling02", "rsyuanyuan13"]],
+      ["team-2", ["huanying04", "forzxol08", "wangjiarui11"]],
+      ["team-3", ["xtm06", "banyuehe09", "zenithceleste15"]],
+      ["team-4", ["lingjunzimei07", "fidrop12", "yingchuanbai14"]],
+      ["team-5", ["phony03", "chunye05", "headphoneline10"]]
     ] as const;
-    for (const [teamId, numbers] of expected) {
+    for (const [teamId, usernames] of expected) {
       expect(loginAccounts.filter((account) => account.teamId === teamId).map((account) => account.username))
-        .toEqual(numbers.map((number) => `hrg-player-${number}`));
+        .toEqual(usernames);
     }
     expect(loginAccounts.filter((account) => account.role === 'staff').every((account) => !account.teamId)).toBe(true);
   });
@@ -30,15 +30,22 @@ describe("活动账号登录权限", () => {
     expect(resolveLoginSession('player', 'test-player', 'wrong', fixtures)).toBeNull();
   });
 
-  it("仅配置 4 个工作人员和 20 个玩家账号，账号与盐值不重复", () => {
-    expect(loginAccounts).toHaveLength(24);
+  it("仅配置 4 个工作人员和 15 个玩家账号，账号与盐值不重复", () => {
+    expect(loginAccounts).toHaveLength(19);
     expect(loginAccounts.filter((account) => account.role === "staff")).toHaveLength(4);
-    expect(loginAccounts.filter((account) => account.role === "player")).toHaveLength(20);
-    expect(new Set(loginAccounts.map((account) => account.username)).size).toBe(24);
-    expect(new Set(loginAccounts.map((account) => account.salt)).size).toBe(24);
-    expect(new Set(loginAccounts.map((account) => account.passwordHash)).size).toBe(24);
+    expect(loginAccounts.filter((account) => account.role === "player")).toHaveLength(15);
+    expect(new Set(loginAccounts.map((account) => account.username)).size).toBe(19);
+    expect(new Set(loginAccounts.map((account) => account.salt)).size).toBe(19);
+    expect(new Set(loginAccounts.map((account) => account.passwordHash)).size).toBe(19);
     expect(loginAccounts.every((account) => /^[a-f0-9]{64}$/.test(account.passwordHash))).toBe(true);
     expect(loginAccounts.some((account) => account.username === "player01")).toBe(false);
+  });
+
+  it("原编号玩家账号已撤销，新玩家账号仅包含字母和数字", () => {
+    for (let number = 1; number <= 20; number++) {
+      expect(resolveLoginAccess('player', `hrg-player-${String(number).padStart(2, '0')}`, 'any-password')).toBe('waiting');
+    }
+    expect(loginAccounts.filter(account => account.role === 'player').every(account => /^[a-z0-9]+$/.test(account.username))).toBe(true);
   });
 
   it.each<UserMode>(["player", "staff"])("正确凭据只能进入绑定的 %s 身份", (mode) => {

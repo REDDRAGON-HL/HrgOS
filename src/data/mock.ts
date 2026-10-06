@@ -60,13 +60,13 @@ export const initialMessages: GameMessage[] = [
 export const teams: TeamStatus[] = [
   { id: "team-1", name: "Phigros队", shortName: "PHI", score: 126, rank: 2, region: "B 区", status: "online", lastSeen: "刚刚", x: 47, y: 44, color: "#c8ff32" },
   { id: "team-2", name: "Arcaea队", shortName: "ARC", score: 139, rank: 1, region: "B 区", status: "online", lastSeen: "3 秒前", x: 64, y: 32, color: "#42d9ff" },
-  { id: "team-3", name: "CHUNITHM队", shortName: "CHU", score: 102, rank: 3, region: "A 区", status: "offline", lastSeen: "2 分钟前", x: 31, y: 62, color: "#a78bfa" },
+  { id: "team-3", name: "范式起源队", shortName: "PPR", score: 102, rank: 3, region: "A 区", status: "offline", lastSeen: "2 分钟前", x: 31, y: 62, color: "#a78bfa" },
   { id: "team-4", name: "maimai队", shortName: "MMA", score: 88, rank: 4, region: "工作人员包厢", status: "finished", lastSeen: "14:02 完赛", x: 76, y: 74, color: "#f6c84f" },
-  { id: "team-5", name: "Rotaeno队", shortName: "ROT", score: 74, rank: 5, region: "A 区", status: "online", lastSeen: "7 秒前", x: 20, y: 38, color: "#ff4f9a" }
+  { id: "team-5", name: "全能队", shortName: "ALL", score: 74, rank: 5, region: "A 区", status: "online", lastSeen: "7 秒前", x: 20, y: 38, color: "#ff4f9a" }
 ];
 
 export const initialAuditQueue: AuditItem[] = [
-  { id: "A-108", kind: "普通任务", team: "CHUNITHM队", task: "极限连击", submittedAt: "14:28:16", waitingSeconds: 42, imageTone: "tone-cyan", checklist: ["两名队员至少一人出镜", "三个编号清晰可辨", "画面为现场原图"] },
-  { id: "A-109", kind: "图寻题", teamId: "team-5", targetRegionId: "stage-b", team: "Rotaeno队", task: "B 区 · 入口图寻", submittedAt: "14:28:41", waitingSeconds: 17, imageTone: "tone-lime", checklist: ["与参考图为同一入口标识", "画面包含本队成员", "位置编号完整"] },
+  { id: "A-108", kind: "普通任务", team: "范式起源队", task: "极限连击", submittedAt: "14:28:16", waitingSeconds: 42, imageTone: "tone-cyan", checklist: ["两名队员至少一人出镜", "三个编号清晰可辨", "画面为现场原图"] },
+  { id: "A-109", kind: "图寻题", teamId: "team-5", targetRegionId: "stage-b", team: "全能队", task: "B 区 · 入口图寻", submittedAt: "14:28:41", waitingSeconds: 17, imageTone: "tone-lime", checklist: ["与参考图为同一入口标识", "画面包含本队成员", "位置编号完整"] },
   { id: "A-110", kind: "普通任务", team: "Phigros队", task: "盲区协作", submittedAt: "14:28:52", waitingSeconds: 6, imageTone: "tone-violet", checklist: ["站位与参考一致", "队友完整出镜", "未遮挡公共通道"] }
 ];

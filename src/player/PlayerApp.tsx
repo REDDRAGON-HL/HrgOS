@@ -24,6 +24,7 @@ import type { GameCard, GameMessage, Task, TeamStatus } from "../types";
 import { Modal, StatusChip } from "../components/ui";
 import { bingoSlots, getPhotoClue, photoRegions } from '../data/photoClues';
 import { PhotoPreview } from './PhotoPreview';
+import { teams } from '../data/mock';
 
 interface PlayerAppProps {
   team: TeamStatus;
@@ -60,7 +61,7 @@ export function PlayerApp({
   const [playingCard, setPlayingCard] = useState<GameCard | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  const [cardTarget, setCardTarget] = useState("Arcaea队");
+  const [cardTarget, setCardTarget] = useState(() => teams.find(candidate => candidate.id !== team.id)!.name);
   const [showMessages, setShowMessages] = useState(false);
   const [motionEnabled, setMotionEnabled] = useState(true);
   const [pageVisible, setPageVisible] = useState(true);
@@ -300,7 +301,7 @@ export function PlayerApp({
             <Sparkles size={52} aria-hidden="true" />
             <small>{cardNames[selectedCard.category]}牌</small>
           </div>
-          <label className="field"><span>目标队伍</span><select value={cardTarget} onChange={(event) => setCardTarget(event.target.value)}><option>Arcaea队</option><option>CHUNITHM队</option><option>Rotaeno队</option></select></label>
+          <label className="field"><span>目标队伍</span><select value={cardTarget} onChange={(event) => setCardTarget(event.target.value)}>{teams.filter(candidate => candidate.id !== team.id).map(candidate => <option key={candidate.id}>{candidate.name}</option>)}</select></label>
           {selectedCard.needsConfirmation ? <p className="inline-alert"><ShieldAlert size={18} aria-hidden="true" />出牌后等待工作人员确认。</p> : null}
           <button className="button button--primary button--full" onClick={playCard}><Zap size={18} aria-hidden="true" />打出这张牌</button>
         </Modal>

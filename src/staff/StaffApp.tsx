@@ -192,7 +192,7 @@ function StaffOverview({
           </div>
           <div className="event-queue-row">
             <span className="event-queue-row__icon"><RotateCcw size={22} aria-hidden="true" /></span>
-            <div><strong>Rotaeno队 · A 区</strong><p>尚未抽取事件候选</p></div>
+            <div><strong>全能队 · A 区</strong><p>尚未抽取事件候选</p></div>
             <button className="button button--ghost button--small">抽取</button>
           </div>
         </article>

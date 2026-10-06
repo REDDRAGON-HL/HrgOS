@@ -31,7 +31,7 @@ export default defineConfig({
     host: "0.0.0.0",
     port: 3000,
     fs: {
-      deny: [".env", ".env.*", "*.{crt,pem}", "**/.git/**", "**/local-private/**"]
+      deny: [".env", ".env.*", "*.{crt,pem}", "**/.git/**", "**/local-private/**", "**/失序重奏志愿分组与账号表-20261007.xlsx"]
     }
   },
   preview: {
